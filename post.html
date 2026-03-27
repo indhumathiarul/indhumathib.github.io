@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Post — Indhu's Coding Corner</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<!-- Google AdSense -->
+<!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script> -->
+<style>
+:root {
+  --bg:#080810;--surface:#10101c;--surface2:#18182a;--border:#252538;
+  --accent:#7c6aff;--accent2:#ff6a9b;--accent3:#6affda;--gold:#ffc864;
+  --text:#eeeef8;--muted:#7878a0;--mono:'Space Mono',monospace;--sans:'Syne',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.6;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(124,106,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(124,106,255,0.025) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0;}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;height:58px;background:rgba(8,8,16,0.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);}
+.nav-logo{font-family:var(--mono);font-size:0.78rem;color:var(--accent3);text-decoration:none;}
+.nav-logo span{color:var(--accent);}
+.nav-back{font-family:var(--mono);font-size:0.72rem;color:var(--muted);text-decoration:none;transition:color 0.2s;display:flex;align-items:center;gap:0.4rem;}
+.nav-back:hover{color:var(--accent3);}
+
+.post-wrapper{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:80px 1.5rem 4rem;}
+
+/* META */
+.post-header{margin-bottom:2.5rem;}
+.post-tag-row{display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;flex-wrap:wrap;}
+.tag{font-family:var(--mono);font-size:0.62rem;padding:0.2rem 0.55rem;border-radius:2px;text-transform:uppercase;letter-spacing:0.06em;font-weight:700;}
+.tag-dotnet{background:rgba(124,106,255,0.18);color:var(--accent);}
+.tag-aws{background:rgba(255,106,155,0.18);color:var(--accent2);}
+.tag-tech{background:rgba(106,255,218,0.12);color:var(--accent3);}
+.tag-patterns{background:rgba(255,200,100,0.15);color:var(--gold);}
+.tag-cloud{background:rgba(100,200,255,0.12);color:#64c8ff;}
+.post-date{font-family:var(--mono);font-size:0.68rem;color:var(--muted);}
+.post-title{font-size:clamp(1.6rem,5vw,2.6rem);font-weight:800;letter-spacing:-0.025em;line-height:1.2;margin-bottom:1rem;}
+.post-desc{font-family:var(--mono);font-size:0.85rem;color:var(--muted);line-height:1.75;padding-bottom:1.75rem;border-bottom:1px solid var(--border);}
+
+/* AD SLOTS */
+.ad-slot{background:var(--surface);border:1px dashed var(--border);border-radius:6px;padding:1.25rem;text-align:center;color:var(--muted);font-family:var(--mono);font-size:0.68rem;letter-spacing:0.08em;text-transform:uppercase;margin:2rem 0;}
+
+/* ARTICLE CONTENT */
+.article-body{margin:2rem 0;font-size:0.96rem;line-height:1.85;color:var(--text);}
+.article-body h1{font-size:1.8rem;font-weight:800;margin:2rem 0 1rem;letter-spacing:-0.02em;}
+.article-body h2{font-size:1.35rem;font-weight:700;margin:1.75rem 0 0.75rem;color:var(--text);}
+.article-body h3{font-size:1.1rem;font-weight:700;margin:1.5rem 0 0.5rem;color:var(--accent3);}
+.article-body p{margin-bottom:1.1rem;}
+.article-body ul,.article-body ol{margin:0.75rem 0 1rem 1.5rem;}
+.article-body li{margin-bottom:0.4rem;}
+.article-body pre{background:#0d0d1a;border:1px solid var(--border);border-radius:6px;padding:1.25rem;overflow-x:auto;margin:1.25rem 0;}
+.article-body pre code{font-family:var(--mono);font-size:0.8rem;color:#c8c8ff;line-height:1.7;}
+.article-body code{font-family:var(--mono);background:rgba(124,106,255,0.12);color:var(--accent3);padding:0.15rem 0.4rem;border-radius:3px;font-size:0.83rem;}
+.article-body pre code{background:none;color:inherit;padding:0;}
+.article-body a{color:var(--accent);text-decoration:underline;}
+.article-body blockquote{border-left:3px solid var(--accent);padding-left:1.25rem;color:var(--muted);font-style:italic;margin:1.25rem 0;}
+.article-body hr{border:none;border-top:1px solid var(--border);margin:2rem 0;}
+.article-body strong{color:var(--text);font-weight:700;}
+.article-body em{color:var(--accent3);}
+.article-body img{max-width:100%;border-radius:6px;margin:1rem 0;}
+.article-body table{width:100%;border-collapse:collapse;margin:1.25rem 0;font-size:0.85rem;}
+.article-body th{background:var(--surface2);padding:0.6rem 0.9rem;text-align:left;font-family:var(--mono);font-size:0.72rem;letter-spacing:0.06em;text-transform:uppercase;border:1px solid var(--border);color:var(--muted);}
+.article-body td{padding:0.6rem 0.9rem;border:1px solid var(--border);}
+
+/* HTML FILE EMBED */
+.html-frame{width:100%;min-height:80vh;border:none;border-radius:8px;margin:1.5rem 0;}
+
+/* BOTTOM SHARE */
+.post-footer{border-top:1px solid var(--border);padding-top:2rem;margin-top:3rem;}
+.share-row{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;}
+.share-label{font-family:var(--mono);font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;}
+.share-btn{font-family:var(--mono);font-size:0.7rem;padding:0.35rem 0.85rem;border-radius:3px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all 0.2s;text-decoration:none;display:inline-block;}
+.share-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+.nl-mini{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:2rem;text-align:center;margin-top:2rem;}
+.nl-mini h3{font-size:1.1rem;font-weight:800;margin-bottom:0.5rem;}
+.nl-mini p{font-family:var(--mono);font-size:0.75rem;color:var(--muted);margin-bottom:1.25rem;}
+.btn{display:inline-flex;align-items:center;gap:0.4rem;padding:0.65rem 1.25rem;font-family:var(--mono);font-size:0.75rem;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;border-radius:4px;transition:all 0.2s;cursor:pointer;border:none;text-decoration:none;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{background:#6a58ff;}
+.btn-ghost{background:transparent;color:var(--accent3);border:1px solid rgba(106,255,218,0.35);}
+.btn-ghost:hover{background:rgba(106,255,218,0.07);}
+
+.loading{text-align:center;padding:4rem;font-family:var(--mono);color:var(--muted);}
+.not-found{text-align:center;padding:5rem 2rem;}
+.not-found h2{font-size:1.5rem;margin-bottom:1rem;}
+.not-found p{font-family:var(--mono);font-size:0.8rem;color:var(--muted);}
+
+@media(max-width:600px){
+  .post-wrapper{padding:70px 1rem 3rem;}
+  .post-title{font-size:1.5rem;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html"><span>//</span> indhu's coding corner</a>
+  <a class="nav-back" href="blog.html">← All posts</a>
+</nav>
+
+<div class="post-wrapper" id="postWrapper">
+  <div class="loading">Loading post...</div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  const params = new URLSearchParams(window.location.search);
+  const postId = params.get('id');
+  const wrapper = document.getElementById('postWrapper');
+
+  const tagMap = { '.NET':'tag-dotnet','AWS':'tag-aws','Cloud':'tag-cloud','Patterns':'tag-patterns','Tech':'tag-tech' };
+
+  async function loadPost() {
+    if (!postId) { renderNotFound(); return; }
+    try {
+      const snap = await getDoc(doc(db, 'posts', postId));
+      if (!snap.exists()) { renderNotFound(); return; }
+      const p = snap.data();
+      document.title = `${p.title} — Indhu's Coding Corner`;
+      const date = p.createdAt ? new Date(p.createdAt.seconds*1000).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : '';
+
+      let contentHtml = '';
+
+      if (p.contentType === 'html-file') {
+        // For uploaded HTML files, render in an iframe using blob URL
+        const blob = new Blob([p.content], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        contentHtml = `<iframe class="html-frame" src="${url}" sandbox="allow-scripts allow-same-origin"></iframe>`;
+      } else {
+        contentHtml = `<div class="article-body">${p.content}</div>`;
+      }
+
+      wrapper.innerHTML = `
+        <div class="post-header">
+          <div class="post-tag-row">
+            <span class="tag ${tagMap[p.tag]||'tag-tech'}">${p.tag||'Tech'}</span>
+            <span class="post-date">${date}</span>
+          </div>
+          <h1 class="post-title">${p.title}</h1>
+          ${p.description ? `<p class="post-desc">${p.description}</p>` : ''}
+        </div>
+
+        <!-- AD TOP -->
+        <div class="ad-slot">
+          <!-- AdSense rectangle: ins class="adsbygoogle" ... -->
+          Advertisement
+        </div>
+
+        ${contentHtml}
+
+        <!-- AD BOTTOM -->
+        <div class="ad-slot">
+          <!-- AdSense rectangle: ins class="adsbygoogle" ... -->
+          Advertisement
+        </div>
+
+        <div class="post-footer">
+          <div class="share-row">
+            <span class="share-label">Share:</span>
+            <a class="share-btn" href="https://twitter.com/intent/tweet?text=${encodeURIComponent(p.title)}&url=${encodeURIComponent(window.location.href)}" target="_blank">Twitter/X</a>
+            <a class="share-btn" href="https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}" target="_blank">LinkedIn</a>
+            <button class="share-btn" onclick="navigator.clipboard.writeText(window.location.href).then(()=>this.textContent='Copied!')">Copy link</button>
+          </div>
+
+          <div class="nl-mini">
+            <h3>Enjoyed this? There's more. ✉️</h3>
+            <p>New guides and articles whenever inspiration strikes — straight to your inbox.</p>
+            <a href="https://indhuscodingcorner.substack.com" target="_blank" class="btn btn-primary">Subscribe on Substack</a>
+          </div>
+
+          <div style="text-align:center;margin-top:2rem;">
+            <a href="blog.html" class="btn btn-ghost">← Back to all posts</a>
+          </div>
+        </div>
+      `;
+    } catch(e) {
+      wrapper.innerHTML = `<div class="not-found"><h2>Error loading post</h2><p>${e.message}</p><br><a href="blog.html" style="color:var(--accent);font-family:var(--mono);font-size:0.8rem;">← Back to blog</a></div>`;
+    }
+  }
+
+  function renderNotFound() {
+    wrapper.innerHTML = `<div class="not-found"><h2>Post not found</h2><p>This post doesn't exist or was removed.</p><br><a href="blog.html" style="color:var(--accent);font-family:var(--mono);font-size:0.8rem;">← Back to blog</a></div>`;
+  }
+
+  loadPost();
+</script>
+</body>
+</html>

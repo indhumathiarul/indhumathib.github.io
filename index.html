@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Indhu's Coding Corner — Tech Guides & Articles</title>
+<meta name="description" content="Backend engineer exploring .NET, AWS, Cloud, Design Patterns and everything tech. Guides, articles and deep dives by Indhumathi Baskar.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<!-- Google AdSense — replace with your publisher ID after approval -->
+<!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script> -->
+<style>
+:root {
+  --bg: #080810;
+  --surface: #10101c;
+  --surface2: #18182a;
+  --border: #252538;
+  --accent: #7c6aff;
+  --accent2: #ff6a9b;
+  --accent3: #6affda;
+  --gold: #ffc864;
+  --text: #eeeef8;
+  --muted: #7878a0;
+  --mono: 'Space Mono', monospace;
+  --sans: 'Syne', sans-serif;
+  --radius: 8px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: var(--sans); line-height: 1.6; overflow-x: hidden; }
+
+/* Grid bg */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: linear-gradient(rgba(124,106,255,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(124,106,255,0.035) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none; z-index: 0;
+}
+
+/* NAV */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 1.5rem; height: 60px;
+  background: rgba(8,8,16,0.9); backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-logo { font-family: var(--mono); font-size: 0.8rem; color: var(--accent3); text-decoration: none; letter-spacing: 0.04em; white-space: nowrap; }
+.nav-logo span { color: var(--accent); }
+.nav-right { display: flex; align-items: center; gap: 1.5rem; }
+.nav-links { display: flex; gap: 1.5rem; list-style: none; }
+.nav-links a { color: var(--muted); text-decoration: none; font-size: 0.78rem; font-family: var(--mono); letter-spacing: 0.06em; text-transform: uppercase; transition: color 0.2s; }
+.nav-links a:hover { color: var(--accent3); }
+.nav-admin { font-family: var(--mono); font-size: 0.7rem; color: var(--accent2); text-decoration: none; border: 1px solid rgba(255,106,155,0.3); padding: 0.3rem 0.7rem; border-radius: 3px; transition: all 0.2s; }
+.nav-admin:hover { background: rgba(255,106,155,0.1); }
+
+/* hamburger */
+.hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; }
+.hamburger span { width: 22px; height: 2px; background: var(--muted); border-radius: 2px; transition: all 0.3s; display: block; }
+.mobile-menu { display: none; position: fixed; top: 60px; left: 0; right: 0; background: rgba(8,8,16,0.98); border-bottom: 1px solid var(--border); padding: 1.5rem; z-index: 199; flex-direction: column; gap: 1rem; }
+.mobile-menu a { color: var(--muted); text-decoration: none; font-family: var(--mono); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em; padding: 0.5rem 0; border-bottom: 1px solid var(--border); }
+.mobile-menu a:last-child { border: none; color: var(--accent2); }
+.mobile-menu.open { display: flex; }
+
+/* HERO */
+.hero {
+  position: relative; z-index: 1;
+  min-height: 100vh; display: flex; flex-direction: column; justify-content: center;
+  padding: 80px 1.5rem 4rem; max-width: 960px; margin: 0 auto;
+}
+.badge {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  font-family: var(--mono); font-size: 0.68rem; color: var(--accent3);
+  letter-spacing: 0.12em; text-transform: uppercase;
+  border: 1px solid rgba(106,255,218,0.25); padding: 0.3rem 0.75rem; border-radius: 2px;
+  margin-bottom: 2rem; width: fit-content;
+  animation: fadeUp 0.5s ease both;
+}
+.badge-dot { width: 6px; height: 6px; background: var(--accent3); border-radius: 50%; animation: blink 2s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+.hero h1 {
+  font-size: clamp(2.6rem, 9vw, 5.8rem);
+  font-weight: 800; line-height: 1.0; letter-spacing: -0.03em;
+  margin-bottom: 1.5rem; animation: fadeUp 0.5s 0.08s ease both;
+}
+.hero h1 .line2 {
+  background: linear-gradient(120deg, var(--accent) 0%, var(--accent2) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  display: block;
+}
+.hero-sub {
+  font-family: var(--mono); font-size: clamp(0.8rem, 2.2vw, 0.95rem);
+  color: var(--muted); max-width: 520px; line-height: 1.85;
+  margin-bottom: 2.5rem; animation: fadeUp 0.5s 0.16s ease both;
+}
+.hero-sub em { color: var(--accent3); font-style: normal; }
+.hero-btns { display: flex; flex-wrap: wrap; gap: 0.85rem; animation: fadeUp 0.5s 0.24s ease both; }
+
+.btn { display: inline-flex; align-items: center; gap: 0.45rem; padding: 0.7rem 1.4rem; font-family: var(--mono); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; text-decoration: none; border-radius: 3px; transition: all 0.2s; cursor: pointer; border: none; white-space: nowrap; }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: #6a58ff; transform: translateY(-2px); box-shadow: 0 8px 28px rgba(124,106,255,0.35); }
+.btn-ghost { background: transparent; color: var(--accent3); border: 1px solid rgba(106,255,218,0.35); }
+.btn-ghost:hover { background: rgba(106,255,218,0.07); transform: translateY(-2px); }
+
+/* AD SLOT */
+.ad-slot {
+  background: var(--surface); border: 1px dashed var(--border);
+  border-radius: var(--radius); padding: 1.5rem; text-align: center;
+  color: var(--muted); font-family: var(--mono); font-size: 0.7rem;
+  letter-spacing: 0.08em; text-transform: uppercase; position: relative; z-index: 1;
+}
+.ad-slot-banner { max-width: 960px; margin: 0 auto 0; }
+
+/* SECTIONS */
+.section { position: relative; z-index: 1; max-width: 960px; margin: 0 auto; padding: 4.5rem 1.5rem; }
+.section-label { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.5rem; }
+.section-title { font-size: clamp(1.5rem, 4vw, 2.2rem); font-weight: 800; letter-spacing: -0.02em; margin-bottom: 2.5rem; }
+.section-title span { color: var(--accent2); }
+
+.divider { height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); position: relative; z-index: 1; }
+
+/* TOPIC FILTERS */
+.filters { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 2rem; }
+.filter-btn {
+  font-family: var(--mono); font-size: 0.68rem; padding: 0.3rem 0.8rem;
+  border-radius: 2px; border: 1px solid var(--border); background: transparent;
+  color: var(--muted); cursor: pointer; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.06em;
+}
+.filter-btn:hover, .filter-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(124,106,255,0.1); }
+
+/* POSTS GRID */
+.posts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem; }
+
+.post-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 1.5rem; text-decoration: none;
+  display: flex; flex-direction: column; gap: 0.75rem;
+  transition: all 0.25s; position: relative; overflow: hidden;
+}
+.post-card::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  transform: scaleX(0); transition: transform 0.3s; transform-origin: left;
+}
+.post-card:hover { border-color: rgba(124,106,255,0.5); transform: translateY(-4px); background: var(--surface2); box-shadow: 0 12px 32px rgba(0,0,0,0.4); }
+.post-card:hover::after { transform: scaleX(1); }
+
+.post-meta { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+.tag { font-family: var(--mono); font-size: 0.62rem; padding: 0.2rem 0.55rem; border-radius: 2px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; }
+.tag-dotnet { background: rgba(124,106,255,0.18); color: var(--accent); }
+.tag-aws { background: rgba(255,106,155,0.18); color: var(--accent2); }
+.tag-tech { background: rgba(106,255,218,0.12); color: var(--accent3); }
+.tag-patterns { background: rgba(255,200,100,0.15); color: var(--gold); }
+.tag-cloud { background: rgba(100,200,255,0.12); color: #64c8ff; }
+
+.post-date { font-family: var(--mono); font-size: 0.62rem; color: var(--muted); margin-left: auto; }
+.post-card h3 { font-size: 1rem; font-weight: 700; color: var(--text); letter-spacing: -0.01em; line-height: 1.4; }
+.post-card p { font-size: 0.82rem; color: var(--muted); line-height: 1.7; flex: 1; }
+.post-read { font-family: var(--mono); font-size: 0.68rem; color: var(--accent); letter-spacing: 0.06em; text-transform: uppercase; margin-top: 0.25rem; }
+
+/* STATS */
+.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 3rem; }
+.stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; text-align: center; }
+.stat-n { font-family: var(--mono); font-size: 1.8rem; font-weight: 700; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.stat-l { font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-top: 0.2rem; }
+
+/* NEWSLETTER BOX */
+.nl-box {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 3rem 2rem; text-align: center; position: relative; overflow: hidden;
+}
+.nl-box::before {
+  content: ''; position: absolute; top: -60%; left: -30%; width: 160%; height: 200%;
+  background: radial-gradient(ellipse at 50% 40%, rgba(124,106,255,0.07) 0%, transparent 65%);
+  pointer-events: none;
+}
+.nl-box h2 { font-size: clamp(1.4rem, 4vw, 2rem); font-weight: 800; margin-bottom: 0.75rem; }
+.nl-box p { color: var(--muted); font-family: var(--mono); font-size: 0.82rem; margin-bottom: 2rem; line-height: 1.7; }
+.nl-tags { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; margin-bottom: 2rem; }
+
+/* ABOUT STRIP */
+.about-strip { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: center; }
+.about-text { color: var(--muted); font-size: 0.9rem; line-height: 1.9; }
+.about-text strong { color: var(--text); }
+.skills { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.5rem; }
+
+/* FOOTER */
+footer {
+  position: relative; z-index: 1; border-top: 1px solid var(--border);
+  padding: 2rem 1.5rem; max-width: 960px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+}
+.footer-copy { font-family: var(--mono); font-size: 0.7rem; color: var(--muted); }
+.footer-copy span { color: var(--accent3); }
+.footer-nav { display: flex; gap: 1.25rem; list-style: none; }
+.footer-nav a { font-family: var(--mono); font-size: 0.68rem; color: var(--muted); text-decoration: none; text-transform: uppercase; letter-spacing: 0.07em; transition: color 0.2s; }
+.footer-nav a:hover { color: var(--accent); }
+
+/* Loading */
+.loading { text-align: center; padding: 3rem; font-family: var(--mono); color: var(--muted); font-size: 0.82rem; }
+.empty { text-align: center; padding: 3rem; font-family: var(--mono); color: var(--muted); }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+.fade-in { opacity: 0; transform: translateY(16px); transition: opacity 0.55s ease, transform 0.55s ease; }
+.fade-in.visible { opacity: 1; transform: translateY(0); }
+
+/* RESPONSIVE */
+@media (max-width: 700px) {
+  .nav-links { display: none; }
+  .nav-admin { display: none; }
+  .hamburger { display: flex; }
+  .hero { padding: 75px 1.25rem 3rem; }
+  .section { padding: 3rem 1.25rem; }
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+  .about-strip { grid-template-columns: 1fr; }
+  .posts-grid { grid-template-columns: 1fr; }
+  footer { flex-direction: column; align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html"><span>//</span> indhu's coding corner</a>
+  <div class="nav-right">
+    <ul class="nav-links">
+      <li><a href="#posts">Posts</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="blog.html">Blog</a></li>
+    </ul>
+    <a class="nav-admin" href="admin.html">Admin ⚡</a>
+    <div class="hamburger" onclick="toggleMenu()">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#posts" onclick="toggleMenu()">Posts</a>
+  <a href="about.html" onclick="toggleMenu()">About</a>
+  <a href="blog.html" onclick="toggleMenu()">Blog</a>
+  <a href="admin.html" onclick="toggleMenu()">Admin ⚡</a>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="badge"><span class="badge-dot"></span> Backend Engineer · Tech Explorer · Writer</div>
+  <h1>
+    Indhumathi<br>
+    <span class="line2">Baskar</span>
+  </h1>
+  <p class="hero-sub">
+    Exploring the world of tech —
+    <em>one guide, one idea at a time.</em><br>
+    .NET · AWS · Cloud · Design Patterns · And whatever's interesting this week.
+  </p>
+  <div class="hero-btns">
+    <a href="#posts" class="btn btn-primary">↓ Read posts</a>
+    <a href="blog.html" class="btn btn-ghost">All articles</a>
+  </div>
+</div>
+
+<!-- AD BANNER (top) -->
+<div class="ad-slot-banner" style="padding: 0 1.5rem;">
+  <div class="ad-slot" style="max-width:960px; margin: 0 auto;">
+    <!-- Google AdSense Auto Ad or manual 728x90 banner -->
+    Ad space — Google AdSense banner will appear here after approval
+  </div>
+</div>
+
+<div class="divider" style="max-width:960px; margin: 2rem auto 0;"></div>
+
+<!-- STATS -->
+<section class="section" id="stats">
+  <div class="stats-row fade-in">
+    <div class="stat"><div class="stat-n" id="postCount">—</div><div class="stat-l">Articles</div></div>
+    <div class="stat"><div class="stat-n">26+</div><div class="stat-l">Guides written</div></div>
+    <div class="stat"><div class="stat-n">5+</div><div class="stat-l">Topics covered</div></div>
+    <div class="stat"><div class="stat-n">∞</div><div class="stat-l">Curiosity</div></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- LATEST POSTS -->
+<section class="section" id="posts">
+  <div class="section-label">// latest posts</div>
+  <h2 class="section-title">From the <span>corner</span></h2>
+
+  <div class="filters">
+    <button class="filter-btn active" onclick="filterPosts('all', this)">All</button>
+    <button class="filter-btn" onclick="filterPosts('.NET', this)">.NET</button>
+    <button class="filter-btn" onclick="filterPosts('AWS', this)">AWS</button>
+    <button class="filter-btn" onclick="filterPosts('Cloud', this)">Cloud</button>
+    <button class="filter-btn" onclick="filterPosts('Patterns', this)">Patterns</button>
+    <button class="filter-btn" onclick="filterPosts('Tech', this)">Tech</button>
+  </div>
+
+  <div class="posts-grid" id="postsGrid">
+    <div class="loading">Loading posts...</div>
+  </div>
+
+  <div style="text-align:center; margin-top:2.5rem;">
+    <a href="blog.html" class="btn btn-ghost">View all posts →</a>
+  </div>
+</section>
+
+<!-- AD SLOT mid-page -->
+<div style="max-width:960px; margin: 0 auto; padding: 0 1.5rem;">
+  <div class="ad-slot">
+    <!-- ins class="adsbygoogle" ... -->
+    Ad space — Google AdSense rectangle ad will appear here
+  </div>
+</div>
+
+<div class="divider" style="max-width:960px; margin: 3rem auto 0;"></div>
+
+<!-- ABOUT STRIP -->
+<section class="section" id="about-strip">
+  <div class="section-label">// who's writing this?</div>
+  <h2 class="section-title">A bit <span>about me</span></h2>
+  <div class="about-strip fade-in">
+    <div>
+      <p class="about-text">
+        Hey, I'm <strong>Indhu</strong> — a backend engineer with a love for building things and an even bigger love for <strong>understanding how they work</strong>.
+        I write detailed technical guides — the kind I wish existed when I was learning.
+        <br><br>
+        I cover <strong>C# and .NET</strong>, <strong>AWS, distributed systems, design patterns</strong>, and anything else that catches my curiosity.
+      </p>
+      <div class="skills">
+        <span class="tag tag-dotnet">C# / .NET</span>
+        <span class="tag tag-aws">AWS</span>
+        <span class="tag tag-tech">gRPC</span>
+        <span class="tag tag-patterns">Design Patterns</span>
+        <span class="tag tag-cloud">Cloud</span>
+        <span class="tag tag-tech">Distributed Systems</span>
+      </div>
+    </div>
+    <div style="text-align:center;">
+      <div style="width:120px;height:120px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:3rem;margin:0 auto 1rem;">👩‍💻</div>
+      <p style="font-family:var(--mono);font-size:0.75rem;color:var(--muted);">Indhumathi Baskar<br><span style="color:var(--accent3);">Backend Engineer</span></p>
+      <a href="about.html" class="btn btn-ghost" style="margin-top:1.25rem; font-size:0.72rem;">Full story →</a>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- NEWSLETTER -->
+<section class="section" id="newsletter">
+  <div class="nl-box fade-in">
+    <div class="section-label" style="text-align:center;margin-bottom:1rem;">// subscribe</div>
+    <h2>Stay in the <span style="background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">corner</span> with me</h2>
+    <p>New guides, articles & tech deep dives — straight to your inbox. No spam ever.</p>
+    <div class="nl-tags">
+      <span class="tag tag-dotnet">.NET & C#</span>
+      <span class="tag tag-aws">AWS & Cloud</span>
+      <span class="tag tag-tech">Tech News</span>
+      <span class="tag tag-patterns">Design Patterns</span>
+      <span class="tag tag-cloud">Distributed Systems</span>
+    </div>
+    <a href="https://indhuscodingcorner.substack.com" target="_blank" class="btn btn-primary" style="font-size:0.85rem;padding:0.9rem 2rem;">
+      Subscribe — it's free ✉️
+    </a>
+    <p style="margin-top:1rem;font-size:0.68rem;color:var(--muted);font-family:var(--mono);">Join via Substack · Unsubscribe anytime</p>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-copy"><span>indhu's coding corner</span> · © 2025 Indhumathi Baskar</div>
+  <ul class="footer-nav">
+    <li><a href="blog.html">Blog</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="https://indhuscodingcorner.substack.com" target="_blank">Substack</a></li>
+    <li><a href="admin.html">Admin</a></li>
+  </ul>
+</footer>
+
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getFirestore, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  let allPosts = [];
+
+  async function loadPosts() {
+    const grid = document.getElementById('postsGrid');
+    try {
+      const q = query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(6));
+      const snap = await getDocs(q);
+      allPosts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      document.getElementById('postCount').textContent = allPosts.length;
+      renderPosts(allPosts);
+    } catch (e) {
+      grid.innerHTML = `<div class="empty">No posts yet. <a href="admin.html" style="color:var(--accent);">Add your first post →</a></div>`;
+    }
+  }
+
+  function tagClass(tag) {
+    const map = { '.NET':'tag-dotnet','AWS':'tag-aws','Cloud':'tag-cloud','Patterns':'tag-patterns','Tech':'tag-tech' };
+    return map[tag] || 'tag-tech';
+  }
+
+  function renderPosts(posts) {
+    const grid = document.getElementById('postsGrid');
+    if (!posts.length) { grid.innerHTML = `<div class="empty">No posts yet.</div>`; return; }
+    grid.innerHTML = posts.map(p => `
+      <a class="post-card fade-in" href="post.html?id=${p.id}">
+        <div class="post-meta">
+          <span class="tag ${tagClass(p.tag)}">${p.tag || 'Tech'}</span>
+          <span class="post-date">${p.createdAt ? new Date(p.createdAt.seconds*1000).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : 'Recent'}</span>
+        </div>
+        <h3>${p.title}</h3>
+        <p>${p.description || ''}</p>
+        <span class="post-read">Read article →</span>
+      </a>
+    `).join('');
+    observeFade();
+  }
+
+  window.filterPosts = function(tag, btn) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderPosts(tag === 'all' ? allPosts : allPosts.filter(p => p.tag === tag));
+  };
+
+  function observeFade() {
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach((e,i) => { if(e.isIntersecting) setTimeout(()=>e.target.classList.add('visible'), i*80); });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
+  }
+
+  loadPosts();
+  observeFade();
+</script>
+
+<script>
+  function toggleMenu() {
+    document.getElementById('mobileMenu').classList.toggle('open');
+  }
+</script>
+</body>
+</html>

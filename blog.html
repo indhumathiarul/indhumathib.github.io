@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blog — Indhu's Coding Corner</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<!-- Google AdSense -->
+<!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script> -->
+<style>
+:root{--bg:#080810;--surface:#10101c;--surface2:#18182a;--border:#252538;--accent:#7c6aff;--accent2:#ff6a9b;--accent3:#6affda;--gold:#ffc864;--text:#eeeef8;--muted:#7878a0;--mono:'Space Mono',monospace;--sans:'Syne',sans-serif;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(124,106,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(124,106,255,0.03) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0;}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;height:58px;background:rgba(8,8,16,0.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);}
+.nav-logo{font-family:var(--mono);font-size:0.78rem;color:var(--accent3);text-decoration:none;}
+.nav-logo span{color:var(--accent);}
+.nav-links{display:flex;gap:1.5rem;list-style:none;}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:0.75rem;font-family:var(--mono);letter-spacing:0.06em;text-transform:uppercase;transition:color 0.2s;}
+.nav-links a:hover,.nav-links a.active{color:var(--accent3);}
+
+.page{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:80px 1.5rem 4rem;}
+
+.page-header{padding:3rem 0 2.5rem;}
+.section-label{font-family:var(--mono);font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--accent);margin-bottom:0.5rem;}
+.page-title{font-size:clamp(2rem,5vw,3rem);font-weight:800;letter-spacing:-0.03em;margin-bottom:0.75rem;}
+.page-title span{color:var(--accent2);}
+.page-sub{font-family:var(--mono);font-size:0.82rem;color:var(--muted);line-height:1.7;}
+
+/* SEARCH + FILTERS */
+.search-bar{position:relative;margin-bottom:1.25rem;}
+.search-bar input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:0.8rem 1rem 0.8rem 2.75rem;color:var(--text);font-family:var(--mono);font-size:0.82rem;outline:none;transition:border-color 0.2s;}
+.search-bar input:focus{border-color:var(--accent);}
+.search-bar input::placeholder{color:var(--muted);}
+.search-icon{position:absolute;left:0.9rem;top:50%;transform:translateY(-50%);color:var(--muted);font-size:0.9rem;}
+.filters{display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:2.5rem;}
+.filter-btn{font-family:var(--mono);font-size:0.67rem;padding:0.3rem 0.8rem;border-radius:2px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all 0.2s;text-transform:uppercase;letter-spacing:0.06em;}
+.filter-btn:hover,.filter-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(124,106,255,0.1);}
+
+/* AD SLOT */
+.ad-slot{background:var(--surface);border:1px dashed var(--border);border-radius:6px;padding:1.25rem;text-align:center;color:var(--muted);font-family:var(--mono);font-size:0.68rem;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:2rem;}
+
+/* POSTS */
+.posts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.25rem;}
+.post-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1.5rem;text-decoration:none;display:flex;flex-direction:column;gap:0.75rem;transition:all 0.25s;position:relative;overflow:hidden;}
+.post-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent2));transform:scaleX(0);transition:transform 0.3s;transform-origin:left;}
+.post-card:hover{border-color:rgba(124,106,255,0.5);transform:translateY(-4px);background:var(--surface2);box-shadow:0 12px 32px rgba(0,0,0,0.4);}
+.post-card:hover::after{transform:scaleX(1);}
+.post-meta{display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;}
+.tag{font-family:var(--mono);font-size:0.6rem;padding:0.18rem 0.5rem;border-radius:2px;text-transform:uppercase;letter-spacing:0.06em;font-weight:700;}
+.tag-dotnet{background:rgba(124,106,255,0.18);color:var(--accent);}
+.tag-aws{background:rgba(255,106,155,0.18);color:var(--accent2);}
+.tag-tech{background:rgba(106,255,218,0.12);color:var(--accent3);}
+.tag-patterns{background:rgba(255,200,100,0.15);color:var(--gold);}
+.tag-cloud{background:rgba(100,200,255,0.12);color:#64c8ff;}
+.post-date{font-family:var(--mono);font-size:0.6rem;color:var(--muted);margin-left:auto;}
+.post-card h3{font-size:1rem;font-weight:700;color:var(--text);letter-spacing:-0.01em;line-height:1.4;}
+.post-card p{font-size:0.82rem;color:var(--muted);line-height:1.7;flex:1;}
+.post-read{font-family:var(--mono);font-size:0.67rem;color:var(--accent);letter-spacing:0.06em;text-transform:uppercase;}
+
+.empty{text-align:center;padding:4rem 2rem;font-family:var(--mono);color:var(--muted);font-size:0.82rem;}
+.loading{text-align:center;padding:3rem;font-family:var(--mono);color:var(--muted);font-size:0.8rem;}
+
+footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2rem 1.5rem;max-width:960px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
+.footer-copy{font-family:var(--mono);font-size:0.68rem;color:var(--muted);}
+.footer-copy span{color:var(--accent3);}
+.footer-nav{display:flex;gap:1.25rem;list-style:none;}
+.footer-nav a{font-family:var(--mono);font-size:0.66rem;color:var(--muted);text-decoration:none;text-transform:uppercase;letter-spacing:0.07em;transition:color 0.2s;}
+.footer-nav a:hover{color:var(--accent);}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{opacity:0;transform:translateY(14px);transition:opacity 0.5s ease,transform 0.5s ease;}
+.fade-in.visible{opacity:1;transform:translateY(0);}
+
+@media(max-width:640px){
+  .page{padding:70px 1rem 3rem;}
+  .posts-grid{grid-template-columns:1fr;}
+  footer{flex-direction:column;align-items:flex-start;}
+  .nav-links{gap:1rem;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html"><span>//</span> indhu's coding corner</a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="blog.html" class="active">Blog</a></li>
+    <li><a href="about.html">About</a></li>
+  </ul>
+</nav>
+
+<div class="page">
+  <div class="page-header">
+    <div class="section-label">// all posts</div>
+    <h1 class="page-title">The <span>corner</span> archives</h1>
+    <p class="page-sub">Every guide, article and deep dive — all in one place.</p>
+  </div>
+
+  <!-- AD BANNER -->
+  <div class="ad-slot">
+    <!-- Google AdSense banner will appear here after approval -->
+    Advertisement
+  </div>
+
+  <!-- SEARCH -->
+  <div class="search-bar">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" placeholder="Search posts..." oninput="handleSearch()">
+  </div>
+
+  <!-- FILTERS -->
+  <div class="filters">
+    <button class="filter-btn active" onclick="filterPosts('all',this)">All</button>
+    <button class="filter-btn" onclick="filterPosts('.NET',this)">.NET</button>
+    <button class="filter-btn" onclick="filterPosts('AWS',this)">AWS</button>
+    <button class="filter-btn" onclick="filterPosts('Cloud',this)">Cloud</button>
+    <button class="filter-btn" onclick="filterPosts('Patterns',this)">Patterns</button>
+    <button class="filter-btn" onclick="filterPosts('Tech',this)">Tech</button>
+  </div>
+
+  <!-- POSTS -->
+  <div class="posts-grid" id="postsGrid">
+    <div class="loading">Loading posts...</div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-copy"><span>indhu's coding corner</span> · © 2025 Indhumathi Baskar</div>
+  <ul class="footer-nav">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="https://indhuscodingcorner.substack.com" target="_blank">Substack</a></li>
+  </ul>
+</footer>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getFirestore, collection, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  let allPosts = [];
+  let activeTag = 'all';
+
+  const tagMap = {'.NET':'tag-dotnet','AWS':'tag-aws','Cloud':'tag-cloud','Patterns':'tag-patterns','Tech':'tag-tech'};
+
+  async function loadPosts() {
+    const grid = document.getElementById('postsGrid');
+    try {
+      const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
+      const snap = await getDocs(q);
+      allPosts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderPosts(allPosts);
+    } catch(e) {
+      grid.innerHTML = `<div class="empty">No posts yet — <a href="admin.html" style="color:var(--accent)">add your first →</a></div>`;
+    }
+  }
+
+  function renderPosts(posts) {
+    const grid = document.getElementById('postsGrid');
+    if (!posts.length) { grid.innerHTML = '<div class="empty">No posts match your search.</div>'; return; }
+    grid.innerHTML = posts.map(p => `
+      <a class="post-card fade-in" href="post.html?id=${p.id}">
+        <div class="post-meta">
+          <span class="tag ${tagMap[p.tag]||'tag-tech'}">${p.tag||'Tech'}</span>
+          <span class="post-date">${p.createdAt ? new Date(p.createdAt.seconds*1000).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : 'Recent'}</span>
+        </div>
+        <h3>${p.title}</h3>
+        <p>${p.description || ''}</p>
+        <span class="post-read">Read article →</span>
+      </a>
+    `).join('');
+    observeFade();
+  }
+
+  window.filterPosts = function(tag, btn) {
+    activeTag = tag;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    applyFilters();
+  };
+
+  window.handleSearch = function() { applyFilters(); };
+
+  function applyFilters() {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    let filtered = allPosts;
+    if (activeTag !== 'all') filtered = filtered.filter(p => p.tag === activeTag);
+    if (q) filtered = filtered.filter(p => p.title.toLowerCase().includes(q) || (p.description||'').toLowerCase().includes(q));
+    renderPosts(filtered);
+  }
+
+  function observeFade() {
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach((e,i) => { if(e.isIntersecting) setTimeout(()=>e.target.classList.add('visible'), i*60); });
+    }, { threshold: 0.08 });
+    document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
+  }
+
+  loadPosts();
+</script>
+</body>
+</html>
