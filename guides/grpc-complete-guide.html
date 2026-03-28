@@ -1,1 +1,1865 @@
-test
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>gRPC — Complete Guide (Beginner to Expert)</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Sora:wght@300;400;600;700;800&display=swap');
+
+:root {
+  --bg: #0a0e1a;
+  --surface: #111827;
+  --card: #1a2235;
+  --border: #1e2d47;
+  --accent: #00d4ff;
+  --accent2: #7c3aed;
+  --accent3: #10b981;
+  --accent4: #f59e0b;
+  --danger: #ef4444;
+  --text: #e2e8f0;
+  --muted: #64748b;
+  --code-bg: #0d1117;
+  --radius: 12px;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Sora', sans-serif;
+  font-size: 15px;
+  line-height: 1.7;
+  min-height: 100vh;
+}
+
+/* ─── HEADER ─── */
+.hero {
+  background: linear-gradient(135deg, #0a0e1a 0%, #0f1729 40%, #1a0a2e 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 40px 20px 32px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0,212,255,.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(0,212,255,.1); border: 1px solid rgba(0,212,255,.3);
+  border-radius: 999px; padding: 5px 16px;
+  font-size: 12px; font-weight: 600; color: var(--accent);
+  letter-spacing: .08em; text-transform: uppercase;
+  margin-bottom: 20px;
+}
+.hero h1 {
+  font-size: clamp(2rem, 6vw, 3.6rem);
+  font-weight: 800; line-height: 1.1;
+  background: linear-gradient(135deg, #fff 0%, var(--accent) 60%, #7c3aed 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  margin-bottom: 14px;
+}
+.hero p { color: var(--muted); max-width: 600px; margin: 0 auto 24px; font-size: 15px; }
+.level-pills {
+  display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+}
+.pill {
+  padding: 4px 14px; border-radius: 999px; font-size: 12px; font-weight: 600;
+  border: 1px solid;
+}
+.pill-green { background: rgba(16,185,129,.12); border-color: rgba(16,185,129,.4); color: #10b981; }
+.pill-blue  { background: rgba(0,212,255,.12);  border-color: rgba(0,212,255,.4);  color: #00d4ff; }
+.pill-purple{ background: rgba(124,58,237,.12); border-color: rgba(124,58,237,.4); color: #a78bfa; }
+.pill-orange{ background: rgba(245,158,11,.12); border-color: rgba(245,158,11,.4); color: #f59e0b; }
+.pill-red   { background: rgba(239,68,68,.12);  border-color: rgba(239,68,68,.4);  color: #ef4444; }
+
+/* ─── NAV ─── */
+.sticky-nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(10,14,26,.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 16px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  white-space: nowrap;
+}
+.nav-inner {
+  display: inline-flex; align-items: center; gap: 2px;
+  min-width: 100%; justify-content: flex-start;
+  padding: 6px 0;
+}
+.nav-btn {
+  flex-shrink: 0;
+  background: none; border: none; color: var(--muted);
+  padding: 7px 14px; border-radius: 8px;
+  font-family: 'Sora', sans-serif; font-size: 12.5px; font-weight: 600;
+  cursor: pointer; transition: all .2s; white-space: nowrap;
+}
+.nav-btn:hover, .nav-btn.active {
+  background: rgba(0,212,255,.1); color: var(--accent);
+}
+
+/* ─── LAYOUT ─── */
+.container { max-width: 960px; margin: 0 auto; padding: 32px 16px 80px; }
+
+/* ─── SECTION ─── */
+.section { display: none; animation: fadeIn .3s ease; }
+.section.active { display: block; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
+
+.section-header {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 28px;
+}
+.section-icon {
+  width: 44px; height: 44px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
+}
+.section-header h2 { font-size: clamp(1.3rem, 4vw, 1.8rem); font-weight: 700; }
+.section-header span { display: block; font-size: 13px; color: var(--muted); font-weight: 400; margin-top: 2px; }
+
+/* ─── CARD ─── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px;
+  margin-bottom: 20px;
+}
+.card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 10px; color: var(--accent); }
+.card h4 { font-size: .9rem; font-weight: 600; margin-bottom: 8px; color: #c4b5fd; }
+
+/* ─── CALLOUT ─── */
+.callout {
+  border-radius: 10px; padding: 14px 18px; margin-bottom: 20px;
+  display: flex; gap: 12px; align-items: flex-start;
+  border-left: 3px solid;
+}
+.callout-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.callout-text { font-size: 13.5px; }
+.callout-text strong { display: block; margin-bottom: 3px; }
+.callout-info { background: rgba(0,212,255,.07); border-color: var(--accent); }
+.callout-tip  { background: rgba(16,185,129,.07); border-color: var(--accent3); }
+.callout-warn { background: rgba(245,158,11,.07); border-color: var(--accent4); }
+
+/* ─── CODE BLOCK ─── */
+.code-wrap { position: relative; margin: 14px 0; }
+.code-label {
+  position: absolute; top: 0; right: 0;
+  background: rgba(0,212,255,.15); color: var(--accent);
+  font-size: 10px; font-weight: 700; letter-spacing: .08em;
+  padding: 3px 10px; border-radius: 0 10px 0 8px;
+}
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 16px 14px;
+  overflow-x: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12.5px;
+  line-height: 1.65;
+  -webkit-overflow-scrolling: touch;
+}
+.kw  { color: #c084fc; }
+.str { color: #86efac; }
+.cmt { color: #4b5563; }
+.typ { color: #67e8f9; }
+.num { color: #fbbf24; }
+.fn  { color: #f9a8d4; }
+.prop{ color: #a5f3fc; }
+.op  { color: #94a3b8; }
+
+/* ─── DIAGRAM ─── */
+.diagram {
+  background: var(--code-bg); border: 1px solid var(--border);
+  border-radius: 10px; padding: 20px;
+  font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  overflow-x: auto; margin: 14px 0;
+  line-height: 1.9;
+}
+
+/* ─── GRID ─── */
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px,1fr)); gap: 16px; margin-bottom: 20px; }
+.grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: 14px; margin-bottom: 20px; }
+
+/* ─── TABLE ─── */
+.table-wrap { overflow-x: auto; margin-bottom: 20px; border-radius: 10px; border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { background: rgba(0,212,255,.1); color: var(--accent); font-weight: 700;
+     padding: 11px 14px; text-align: left; font-size: 12px; letter-spacing: .04em; }
+td { padding: 10px 14px; border-top: 1px solid var(--border); vertical-align: top; }
+tr:hover td { background: rgba(255,255,255,.02); }
+
+/* ─── STEP ─── */
+.steps { list-style: none; }
+.step {
+  display: flex; gap: 16px; margin-bottom: 20px;
+  align-items: flex-start;
+}
+.step-num {
+  width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 13px; margin-top: 1px;
+}
+.step-body h4 { font-size: .9rem; font-weight: 700; margin-bottom: 6px; color: #e2e8f0; }
+.step-body p  { font-size: 13.5px; color: #94a3b8; }
+
+/* ─── COMPARE ─── */
+.compare { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+@media (max-width: 520px) { .compare { grid-template-columns: 1fr; } }
+.compare-box { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+.compare-box h4 { font-size: .85rem; font-weight: 700; margin-bottom: 10px; }
+.compare-box ul { list-style: none; }
+.compare-box li { padding: 4px 0; font-size: 13px; color: #94a3b8; }
+.compare-box li::before { content: '✓ '; color: var(--accent3); font-weight: 700; }
+.compare-box.vs li::before { content: '✗ '; color: var(--danger); }
+
+/* ─── TAG ─── */
+.tag {
+  display: inline-block; padding: 2px 10px; border-radius: 6px;
+  font-size: 11px; font-weight: 700; letter-spacing: .05em;
+  margin: 2px;
+}
+.tag-blue   { background: rgba(0,212,255,.15); color: var(--accent); }
+.tag-purple { background: rgba(124,58,237,.2); color: #c4b5fd; }
+.tag-green  { background: rgba(16,185,129,.15); color: #10b981; }
+.tag-orange { background: rgba(245,158,11,.15); color: #f59e0b; }
+
+/* ─── FLOW ─── */
+.flow {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 6px;
+  margin: 14px 0;
+}
+.flow-box {
+  background: rgba(0,212,255,.1); border: 1px solid rgba(0,212,255,.3);
+  border-radius: 8px; padding: 8px 14px;
+  font-size: 13px; font-weight: 600; color: var(--accent);
+}
+.flow-arrow { color: var(--muted); font-size: 18px; }
+
+/* ─── CHECKLIST ─── */
+.checklist { list-style: none; }
+.checklist li {
+  padding: 7px 0; border-bottom: 1px solid var(--border);
+  display: flex; gap: 10px; align-items: flex-start;
+  font-size: 13.5px;
+}
+.checklist li:last-child { border: none; }
+.checklist li::before { content: '●'; color: var(--accent); flex-shrink: 0; margin-top: 2px; }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 640px) {
+  .card { padding: 16px; }
+  pre { font-size: 11.5px; padding: 14px 12px 10px; }
+  .diagram { font-size: 10.5px; padding: 14px; }
+  .grid-3 { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 400px) {
+  .grid-3 { grid-template-columns: 1fr; }
+  .hero h1 { font-size: 1.8rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════ HERO ══════════ -->
+<div class="hero">
+  <div class="hero-badge">📡 Complete Reference Guide</div>
+  <h1>gRPC</h1>
+  <p>Google Remote Procedure Call — from first principles to production mastery, with C# examples at every step.</p>
+  <div class="level-pills">
+    <span class="pill pill-green">🌱 Beginner</span>
+    <span class="pill pill-blue">📘 Basic</span>
+    <span class="pill pill-purple">⚙️ Intermediate</span>
+    <span class="pill pill-orange">🚀 Advanced</span>
+    <span class="pill pill-red">🔥 Expert</span>
+  </div>
+</div>
+
+<!-- ══════════ NAV ══════════ -->
+<nav class="sticky-nav">
+  <div class="nav-inner">
+    <button class="nav-btn active" onclick="show('s1',this)">🌱 What is gRPC?</button>
+    <button class="nav-btn" onclick="show('s2',this)">📄 Proto Files</button>
+    <button class="nav-btn" onclick="show('s3',this)">🛠️ Setup C#</button>
+    <button class="nav-btn" onclick="show('s4',this)">📞 Unary RPC</button>
+    <button class="nav-btn" onclick="show('s5',this)">🌊 Streaming</button>
+    <button class="nav-btn" onclick="show('s6',this)">🔐 Auth &amp; Security</button>
+    <button class="nav-btn" onclick="show('s7',this)">⚙️ Interceptors</button>
+    <button class="nav-btn" onclick="show('s8',this)">🔄 Load Balancing</button>
+    <button class="nav-btn" onclick="show('s9',this)">📊 Deadlines &amp; Errors</button>
+    <button class="nav-btn" onclick="show('s10',this)">🧪 Testing</button>
+    <button class="nav-btn" onclick="show('s11',this)">🌐 gRPC-Web</button>
+    <button class="nav-btn" onclick="show('s12',this)">🏭 Production</button>
+    <button class="nav-btn" onclick="show('s13',this)">📋 Cheatsheet</button>
+  </div>
+</nav>
+
+<div class="container">
+
+<!-- ══════════ S1: WHAT IS gRPC ══════════ -->
+<div id="s1" class="section active">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(16,185,129,.15)">🌱</div>
+    <h2>What is gRPC? <span>Beginner — Core Concept</span></h2>
+  </div>
+
+  <div class="callout callout-info">
+    <div class="callout-icon">💡</div>
+    <div class="callout-text">
+      <strong>Simple Answer</strong>
+      gRPC lets one computer call a function on another computer over the network — as if that function lived locally. It's like REST API but faster, strongly typed, and built for microservices.
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>The Analogy 🍕</h3>
+    <p>Imagine ordering pizza on a phone call vs texting. REST API is like texting — flexible but wordy (JSON). gRPC is the phone call — direct, efficient, structured. The <strong>menu</strong> is your <code>.proto</code> file. The <strong>order items</strong> are your messages. The call itself is the RPC.</p>
+  </div>
+
+  <div class="card">
+    <h3>Architecture Overview</h3>
+    <div class="diagram">
+┌─────────────────────────────────────────────────────┐
+│                    CLIENT APP                        │
+│  ┌──────────────────────────────────────────────┐   │
+│  │  Generated Stub (C# client)                  │   │
+│  │  grpcClient.SayHello(request)  ◄──── you call│   │
+│  └──────────────┬───────────────────────────────┘   │
+└─────────────────┼───────────────────────────────────┘
+                  │ HTTP/2  (binary, multiplexed)
+                  │ Protobuf serialized bytes
+                  │
+┌─────────────────┼───────────────────────────────────┐
+│                 ▼          SERVER APP                │
+│  ┌──────────────────────────────────────────────┐   │
+│  │  gRPC Server (ASP.NET Core)                  │   │
+│  │  GreeterService.SayHello(context) ◄─ runs    │   │
+│  └──────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────┘
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="compare-box">
+      <h4 style="color:var(--accent3)">✅ gRPC Strengths</h4>
+      <ul class="checklist">
+        <li>Strongly typed contracts (.proto)</li>
+        <li>~7x faster than REST/JSON</li>
+        <li>Supports streaming (real-time)</li>
+        <li>Code generated automatically</li>
+        <li>Works in 10+ languages</li>
+        <li>Built-in deadlines &amp; cancellation</li>
+      </ul>
+    </div>
+    <div class="compare-box vs" style="border-color:rgba(239,68,68,.3)">
+      <h4 style="color:var(--danger)">⚠️ Limitations</h4>
+      <ul class="checklist">
+        <li style="--accent3:#ef4444">Not human readable (binary)</li>
+        <li>Browser support needs gRPC-Web</li>
+        <li>Steeper learning curve</li>
+        <li>Proto schema must be shared</li>
+        <li>Harder to debug raw traffic</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>gRPC vs REST vs GraphQL</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Feature</th><th>gRPC</th><th>REST</th><th>GraphQL</th></tr>
+        <tr><td>Protocol</td><td><span class="tag tag-blue">HTTP/2</span></td><td><span class="tag tag-green">HTTP/1.1+</span></td><td><span class="tag tag-purple">HTTP/1.1+</span></td></tr>
+        <tr><td>Format</td><td>Binary (Protobuf)</td><td>JSON/XML</td><td>JSON</td></tr>
+        <tr><td>Speed</td><td>⚡ Fastest</td><td>Medium</td><td>Medium</td></tr>
+        <tr><td>Streaming</td><td>✅ Native</td><td>SSE/WebSocket</td><td>Subscriptions</td></tr>
+        <tr><td>Type Safety</td><td>✅ Compile-time</td><td>Manual</td><td>Schema</td></tr>
+        <tr><td>Browser</td><td>⚠️ Via gRPC-Web</td><td>✅ Native</td><td>✅ Native</td></tr>
+        <tr><td>Best for</td><td>Microservices</td><td>Public APIs</td><td>Flexible queries</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>How HTTP/2 Powers gRPC</h3>
+    <div class="grid-3">
+      <div style="background:rgba(0,212,255,.07);border:1px solid rgba(0,212,255,.2);border-radius:8px;padding:14px">
+        <div style="font-size:22px;margin-bottom:6px">🔀</div>
+        <div style="font-weight:700;font-size:13px;margin-bottom:4px;color:var(--accent)">Multiplexing</div>
+        <div style="font-size:12px;color:#94a3b8">Multiple calls on one TCP connection, no head-of-line blocking</div>
+      </div>
+      <div style="background:rgba(124,58,237,.07);border:1px solid rgba(124,58,237,.2);border-radius:8px;padding:14px">
+        <div style="font-size:22px;margin-bottom:6px">📦</div>
+        <div style="font-weight:700;font-size:13px;margin-bottom:4px;color:#c4b5fd">Header Compression</div>
+        <div style="font-size:12px;color:#94a3b8">HPACK compression reduces header overhead dramatically</div>
+      </div>
+      <div style="background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.2);border-radius:8px;padding:14px">
+        <div style="font-size:22px;margin-bottom:6px">🌊</div>
+        <div style="font-weight:700;font-size:13px;margin-bottom:4px;color:#10b981">Bidirectional</div>
+        <div style="font-size:12px;color:#94a3b8">Client and server can send data simultaneously in streams</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ S2: PROTO FILES ══════════ -->
+<div id="s2" class="section">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(0,212,255,.15)">📄</div>
+    <h2>Protocol Buffers (.proto) <span>Beginner — The Contract</span></h2>
+  </div>
+
+  <div class="callout callout-info">
+    <div class="callout-icon">📋</div>
+    <div class="callout-text">
+      <strong>The .proto file IS your API contract</strong>
+      It defines services (what functions exist), messages (data shapes), and field types. All code is auto-generated from it — never write serialization code manually.
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Anatomy of a .proto File</h3>
+    <div class="code-wrap">
+      <div class="code-label">PROTOBUF</div>
+<pre><span class="cmt">// syntax version — always use proto3</span>
+<span class="kw">syntax</span> = <span class="str">"proto3"</span>;
+
+<span class="cmt">// namespace in generated C# code</span>
+<span class="kw">option</span> csharp_namespace = <span class="str">"MyApp.Grpc"</span>;
+
+<span class="cmt">// logical grouping</span>
+<span class="kw">package</span> greeter;
+
+<span class="cmt">// ── SERVICE: defines the RPC methods ──────────────</span>
+<span class="kw">service</span> <span class="typ">Greeter</span> {
+  <span class="cmt">// Unary: 1 request → 1 response</span>
+  <span class="kw">rpc</span> <span class="fn">SayHello</span> (<span class="typ">HelloRequest</span>) <span class="kw">returns</span> (<span class="typ">HelloReply</span>);
+
+  <span class="cmt">// Server streaming: 1 request → many responses</span>
+  <span class="kw">rpc</span> <span class="fn">SayHellos</span> (<span class="typ">HelloRequest</span>) <span class="kw">returns</span> (<span class="kw">stream</span> <span class="typ">HelloReply</span>);
+}
+
+<span class="cmt">// ── MESSAGES: define data structures ──────────────</span>
+<span class="kw">message</span> <span class="typ">HelloRequest</span> {
+  <span class="typ">string</span>  name = <span class="num">1</span>;   <span class="cmt">// field number (NOT value!)</span>
+  <span class="typ">int32</span>   age  = <span class="num">2</span>;
+}
+
+<span class="kw">message</span> <span class="typ">HelloReply</span> {
+  <span class="typ">string</span>  message    = <span class="num">1</span>;
+  <span class="typ">bool</span>    is_success = <span class="num">2</span>;
+}</pre>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <h3>Scalar Types</h3>
+      <div class="table-wrap">
+        <table>
+          <tr><th>Proto Type</th><th>C# Type</th></tr>
+          <tr><td>string</td><td>string</td></tr>
+          <tr><td>bool</td><td>bool</td></tr>
+          <tr><td>int32</td><td>int</td></tr>
+          <tr><td>int64</td><td>long</td></tr>
+          <tr><td>float</td><td>float</td></tr>
+          <tr><td>double</td><td>double</td></tr>
+          <tr><td>bytes</td><td>ByteString</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Complex Types</h3>
+      <div class="code-wrap">
+<pre><span class="cmt">// Repeated (list)</span>
+<span class="kw">message</span> <span class="typ">OrderList</span> {
+  <span class="kw">repeated</span> <span class="typ">string</span> items = <span class="num">1</span>;
+}
+
+<span class="cmt">// Map (dictionary)</span>
+<span class="kw">message</span> <span class="typ">Config</span> {
+  <span class="kw">map</span>&lt;<span class="typ">string</span>, <span class="typ">string</span>&gt; settings = <span class="num">1</span>;
+}
+
+<span class="cmt">// Enum</span>
+<span class="kw">enum</span> <span class="typ">Status</span> {
+  UNKNOWN  = <span class="num">0</span>;  <span class="cmt">// must start at 0!</span>
+  ACTIVE   = <span class="num">1</span>;
+  INACTIVE = <span class="num">2</span>;
+}
+
+<span class="cmt">// Nested message</span>
+<span class="kw">message</span> <span class="typ">User</span> {
+  <span class="typ">Address</span> address = <span class="num">1</span>;  <span class="cmt">// another message</span>
+}</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout callout-warn">
+    <div class="callout-icon">⚠️</div>
+    <div class="callout-text">
+      <strong>Field Numbers Are Forever!</strong>
+      Once you assign a field number (e.g., <code>name = 1</code>), never reuse it even if you delete that field. Use <code>reserved 5;</code> to mark retired numbers. Changing them breaks backward compatibility.
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Real-World Example: E-Commerce Proto</h3>
+    <div class="code-wrap">
+      <div class="code-label">order.proto</div>
+<pre><span class="kw">syntax</span> = <span class="str">"proto3"</span>;
+<span class="kw">option</span> csharp_namespace = <span class="str">"EShop.Grpc"</span>;
+<span class="kw">import</span> <span class="str">"google/protobuf/timestamp.proto"</span>;
+
+<span class="kw">service</span> <span class="typ">OrderService</span> {
+  <span class="kw">rpc</span> <span class="fn">CreateOrder</span>  (<span class="typ">CreateOrderRequest</span>)   <span class="kw">returns</span> (<span class="typ">OrderResponse</span>);
+  <span class="kw">rpc</span> <span class="fn">GetOrder</span>     (<span class="typ">GetOrderRequest</span>)      <span class="kw">returns</span> (<span class="typ">OrderResponse</span>);
+  <span class="kw">rpc</span> <span class="fn">StreamOrders</span> (<span class="typ">StreamOrdersRequest</span>) <span class="kw">returns</span> (<span class="kw">stream</span> <span class="typ">OrderEvent</span>);
+}
+
+<span class="kw">message</span> <span class="typ">CreateOrderRequest</span> {
+  <span class="typ">string</span>           customer_id = <span class="num">1</span>;
+  <span class="kw">repeated</span> <span class="typ">OrderItem</span> items    = <span class="num">2</span>;
+}
+
+<span class="kw">message</span> <span class="typ">OrderItem</span> {
+  <span class="typ">string</span> product_id = <span class="num">1</span>;
+  <span class="typ">int32</span>  quantity   = <span class="num">2</span>;
+  <span class="typ">double</span> price      = <span class="num">3</span>;
+}
+
+<span class="kw">message</span> <span class="typ">OrderResponse</span> {
+  <span class="typ">string</span>    order_id   = <span class="num">1</span>;
+  <span class="typ">OrderStatus</span> status  = <span class="num">2</span>;
+  <span class="typ">double</span>    total      = <span class="num">3</span>;
+  <span class="prop">google.protobuf.Timestamp</span> created_at = <span class="num">4</span>;
+}
+
+<span class="kw">enum</span> <span class="typ">OrderStatus</span> {
+  PENDING   = <span class="num">0</span>;
+  CONFIRMED = <span class="num">1</span>;
+  SHIPPED   = <span class="num">2</span>;
+  DELIVERED = <span class="num">3</span>;
+}</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ S3: SETUP C# ══════════ -->
+<div id="s3" class="section">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(124,58,237,.15)">🛠️</div>
+    <h2>Setup in C# / .NET <span>Beginner — First Project</span></h2>
+  </div>
+
+  <ul class="steps">
+    <li class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <h4>Create ASP.NET Core gRPC Server Project</h4>
+        <div class="code-wrap"><pre><span class="cmt"># Create new gRPC server project</span>
+dotnet new grpc -n MyGrpcServer
+cd MyGrpcServer
+
+<span class="cmt"># Or add to existing ASP.NET Core project</span>
+dotnet add package Grpc.AspNetCore</pre></div>
+      </div>
+    </li>
+    <li class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <h4>Project Structure</h4>
+        <div class="diagram">
+MyGrpcServer/
+├── Protos/
+│   └── greet.proto          ← your .proto file here
+├── Services/
+│   └── GreeterService.cs    ← implement the service
+├── appsettings.json
+└── Program.cs               ← register services + endpoints</div>
+      </div>
+    </li>
+    <li class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <h4>Configure .csproj to Build Proto</h4>
+        <div class="code-wrap">
+          <div class="code-label">.csproj</div>
+<pre><span class="op">&lt;</span><span class="typ">ItemGroup</span><span class="op">&gt;</span>
+  <span class="op">&lt;</span><span class="typ">Protobuf</span>
+    Include=<span class="str">"Protos\greet.proto"</span>
+    GrpcServices=<span class="str">"Server"</span> <span class="op">/&gt;</span>  <span class="cmt">&lt;!-- Server or Client or Both --&gt;</span>
+<span class="op">&lt;/</span><span class="typ">ItemGroup</span><span class="op">&gt;</span></pre>
+        </div>
+        <p style="font-size:13px;color:#94a3b8;margin-top:6px">Build the project (<code>dotnet build</code>) — C# classes are auto-generated in <code>obj/</code> folder!</p>
+      </div>
+    </li>
+    <li class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <h4>Program.cs — Register gRPC</h4>
+        <div class="code-wrap">
+          <div class="code-label">Program.cs</div>
+<pre><span class="kw">var</span> builder = WebApplication.<span class="fn">CreateBuilder</span>(args);
+
+<span class="cmt">// Register gRPC services</span>
+builder.Services.<span class="fn">AddGrpc</span>();
+
+<span class="kw">var</span> app = builder.<span class="fn">Build</span>();
+
+<span class="cmt">// Map each gRPC service to a route</span>
+app.<span class="fn">MapGrpcService</span>&lt;<span class="typ">GreeterService</span>&gt;();
+
+app.<span class="fn">Run</span>();</pre>
+        </div>
+      </div>
+    </li>
+    <li class="step">
+      <div class="step-num">5</div>
+      <div class="step-body">
+        <h4>Create a gRPC Client Project</h4>
+        <div class="code-wrap"><pre><span class="cmt"># Client console app</span>
+dotnet new console -n MyGrpcClient
+cd MyGrpcClient
+
+<span class="cmt"># Install client NuGet packages</span>
+dotnet add package Grpc.Net.Client
+dotnet add package Google.Protobuf
+dotnet add package Grpc.Tools</pre>
+        </div>
+        <p style="font-size:13px;color:#94a3b8;margin-top:6px">Add your <code>.proto</code> file in client's <code>.csproj</code> with <code>GrpcServices="Client"</code></p>
+      </div>
+    </li>
+  </ul>
+
+  <div class="callout callout-tip">
+    <div class="callout-icon">🌟</div>
+    <div class="callout-text">
+      <strong>NuGet Packages Summary</strong>
+      Server needs: <code>Grpc.AspNetCore</code> | Client needs: <code>Grpc.Net.Client</code> + <code>Google.Protobuf</code> + <code>Grpc.Tools</code>. Shared libraries (DTOs) need only <code>Google.Protobuf</code> + <code>Grpc.Tools</code>.
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ S4: UNARY RPC ══════════ -->
+<div id="s4" class="section">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(245,158,11,.15)">📞</div>
+    <h2>Unary RPC in C# <span>Basic — The Most Common Pattern</span></h2>
+  </div>
+
+  <div class="callout callout-info">
+    <div class="callout-icon">📋</div>
+    <div class="callout-text">
+      <strong>Unary RPC</strong> = one request, one response. Exactly like a regular method call, just over the network. This covers 80% of gRPC use cases.
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Server-Side Implementation</h3>
+    <div class="code-wrap">
+      <div class="code-label">Services/GreeterService.cs</div>
+<pre><span class="kw">using</span> Grpc.Core;
+<span class="kw">using</span> MyApp.Grpc;
+
+<span class="kw">public class</span> <span class="typ">GreeterService</span> : <span class="typ">Greeter.GreeterBase</span>
+{
+    <span class="kw">private readonly</span> <span class="typ">ILogger</span>&lt;<span class="typ">GreeterService</span>&gt; _logger;
+
+    <span class="kw">public</span> <span class="fn">GreeterService</span>(<span class="typ">ILogger</span>&lt;<span class="typ">GreeterService</span>&gt; logger)
+        => _logger = logger;
+
+    <span class="cmt">// Override the generated base method</span>
+    <span class="kw">public override async</span> <span class="typ">Task</span>&lt;<span class="typ">HelloReply</span>&gt; <span class="fn">SayHello</span>(
+        <span class="typ">HelloRequest</span> request,
+        <span class="typ">ServerCallContext</span> context)    <span class="cmt">// deadline, metadata, cancellation</span>
+    {
+        _logger.<span class="fn">LogInformation</span>(<span class="str">"Received: {Name}"</span>, request.Name);
+
+        <span class="cmt">// Business logic here</span>
+        <span class="kw">await</span> Task.<span class="fn">Delay</span>(<span class="num">10</span>);  <span class="cmt">// simulate async work</span>
+
+        <span class="kw">return new</span> <span class="typ">HelloReply</span>
+        {
+            Message   = <span class="str">$"Hello, {request.Name}!"</span>,
+            IsSuccess = <span class="kw">true</span>
+        };
+    }
+}</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Client-Side Call</h3>
+    <div class="code-wrap">
+      <div class="code-label">Program.cs (Client)</div>
+<pre><span class="kw">using</span> Grpc.Net.Client;
+<span class="kw">using</span> MyApp.Grpc;
+
+<span class="cmt">// 1. Create the channel (connection to server)</span>
+<span class="kw">using var</span> channel = <span class="typ">GrpcChannel</span>.<span class="fn">ForAddress</span>(<span class="str">"https://localhost:7042"</span>);
+
+<span class="cmt">// 2. Create the typed client stub</span>
+<span class="kw">var</span> client = <span class="kw">new</span> <span class="typ">Greeter.GreeterClient</span>(channel);
+
+<span class="cmt">// 3. Make the RPC call — looks like a normal method!</span>
+<span class="kw">var</span> reply = <span class="kw">await</span> client.<span class="fn">SayHelloAsync</span>(<span class="kw">new</span> <span class="typ">HelloRequest</span>
+{
+    Name = <span class="str">"Indhu"</span>,
+    Age  = <span class="num">25</span>
+});
+
+Console.<span class="fn">WriteLine</span>(<span class="str">$"Server replied: {reply.Message}"</span>);
+Console.<span class="fn">WriteLine</span>(<span class="str">$"Success: {reply.IsSuccess}"</span>);</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Using gRPC with Dependency Injection (.NET Client)</h3>
+    <div class="code-wrap">
+      <div class="code-label">Program.cs — DI Registration</div>
+<pre><span class="cmt">// In ASP.NET Core — register with factory pattern</span>
+builder.Services.<span class="fn">AddGrpcClient</span>&lt;<span class="typ">Greeter.GreeterClient</span>&gt;(options =>
+{
+    options.Address = <span class="kw">new</span> <span class="typ">Uri</span>(<span class="str">"https://grpc-server:7042"</span>);
+});
+
+<span class="cmt">// Then inject anywhere</span>
+<span class="kw">public class</span> <span class="typ">MyController</span> : <span class="typ">ControllerBase</span>
+{
+    <span class="kw">private readonly</span> <span class="typ">Greeter.GreeterClient</span> _greeter;
+
+    <span class="kw">public</span> <span class="fn">MyController</span>(<span class="typ">Greeter.GreeterClient</span> greeter)
+        => _greeter = greeter;
+
+    [<span class="typ">HttpGet</span>]
+    <span class="kw">public async</span> <span class="typ">Task</span>&lt;<span class="typ">IActionResult</span>&gt; <span class="fn">Get</span>()
+    {
+        <span class="kw">var</span> result = <span class="kw">await</span> _greeter.<span class="fn">SayHelloAsync</span>(<span class="kw">new</span> <span class="typ">HelloRequest</span> { Name = <span class="str">"Test"</span> });
+        <span class="kw">return</span> <span class="fn">Ok</span>(result.Message);
+    }
+}</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>ServerCallContext — What's Available</h3>
+    <div class="code-wrap">
+<pre><span class="kw">public override async</span> <span class="typ">Task</span>&lt;<span class="typ">HelloReply</span>&gt; <span class="fn">SayHello</span>(
+    <span class="typ">HelloRequest</span> request, <span class="typ">ServerCallContext</span> context)
+{
+    <span class="cmt">// Deadline set by client</span>
+    <span class="kw">var</span> deadline    = context.Deadline;
+
+    <span class="cmt">// Cancellation token — respect this!</span>
+    <span class="kw">var</span> token       = context.CancellationToken;
+
+    <span class="cmt">// Headers sent by client (like HTTP headers)</span>
+    <span class="kw">var</span> authHeader  = context.RequestHeaders.<span class="fn">GetValue</span>(<span class="str">"authorization"</span>);
+
+    <span class="cmt">// Peer address</span>
+    <span class="kw">var</span> peer        = context.Peer;
+
+    <span class="cmt">// Write response trailers (metadata sent after response)</span>
+    context.ResponseTrailers.<span class="fn">Add</span>(<span class="str">"x-request-id"</span>, <span class="typ">Guid</span>.<span class="fn">NewGuid</span>().<span class="fn">ToString</span>());
+
+    <span class="kw">return new</span> <span class="typ">HelloReply</span> { Message = <span class="str">"Done"</span> };
+}</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ S5: STREAMING ══════════ -->
+<div id="s5" class="section">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(0,212,255,.15)">🌊</div>
+    <h2>Streaming RPC <span>Intermediate — Real-Time Data</span></h2>
+  </div>
+
+  <div class="card">
+    <h3>The 4 RPC Patterns</h3>
+    <div class="grid-2">
+      <div style="background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.3);border-radius:8px;padding:14px">
+        <div style="font-weight:700;color:#10b981;margin-bottom:6px">1️⃣ Unary</div>
+        <div class="diagram" style="margin:0;font-size:11px;padding:8px">Client ──[req]──► Server
+Client ◄─[res]── Server</div>
+        <div style="font-size:12px;color:#94a3b8;margin-top:8px">One request, one response</div>
+      </div>
+      <div style="background:rgba(0,212,255,.07);border:1px solid rgba(0,212,255,.3);border-radius:8px;padding:14px">
+        <div style="font-weight:700;color:var(--accent);margin-bottom:6px">2️⃣ Server Streaming</div>
+        <div class="diagram" style="margin:0;font-size:11px;padding:8px">Client ──[req]──► Server
+Client ◄─[r1]── Server
+Client ◄─[r2]── Server
+Client ◄─[r3]── Server</div>
+        <div style="font-size:12px;color:#94a3b8;margin-top:8px">One request, many responses</div>
+      </div>
+      <div style="background:rgba(124,58,237,.07);border:1px solid rgba(124,58,237,.3);border-radius:8px;padding:14px">
+        <div style="font-weight:700;color:#c4b5fd;margin-bottom:6px">3️⃣ Client Streaming</div>
+        <div class="diagram" style="margin:0;font-size:11px;padding:8px">Client ──[m1]──► Server
+Client ──[m2]──► Server
+Client ──[m3]──► Server
+Client ◄─[res]── Server</div>
+        <div style="font-size:12px;color:#94a3b8;margin-top:8px">Many requests, one response</div>
+      </div>
+      <div style="background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.3);border-radius:8px;padding:14px">
+        <div style="font-weight:700;color:#f59e0b;margin-bottom:6px">4️⃣ Bidirectional</div>
+        <div class="diagram" style="margin:0;font-size:11px;padding:8px">Client ──[m1]──► Server
+Client ◄─[r1]── Server
+Client ──[m2]──► Server
+Client ◄─[r2]── Server</div>
+        <div style="font-size:12px;color:#94a3b8;margin-top:8px">Many requests, many responses</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Server Streaming — Live Price Feed</h3>
+    <div class="code-wrap">
+      <div class="code-label">price_feed.proto</div>
+<pre><span class="kw">rpc</span> <span class="fn">StreamPrices</span> (<span class="typ">SubscribeRequest</span>) <span class="kw">returns</span> (<span class="kw">stream</span> <span class="typ">PriceUpdate</span>);</pre>
+    </div>
+    <div class="code-wrap">
+      <div class="code-label">Server</div>
+<pre><span class="kw">public override async</span> <span class="typ">Task</span> <span class="fn">StreamPrices</span>(
+    <span class="typ">SubscribeRequest</span> request,
+    <span class="typ">IServerStreamWriter</span>&lt;<span class="typ">PriceUpdate</span>&gt; responseStream,
+    <span class="typ">ServerCallContext</span> context)
+{
+    <span class="kw">while</span> (!context.CancellationToken.<span class="prop">IsCancellationRequested</span>)
+    {
+        <span class="kw">var</span> price = <span class="kw">await</span> _priceService.<span class="fn">GetLatestAsync</span>(request.Symbol);
+
+        <span class="cmt">// Write each item to the stream</span>
+        <span class="kw">await</span> responseStream.<span class="fn">WriteAsync</span>(<span class="kw">new</span> <span class="typ">PriceUpdate</span>
+        {
+            Symbol    = request.Symbol,
+            Price     = price,
+            Timestamp = <span class="typ">Timestamp</span>.<span class="fn">FromDateTime</span>(<span class="typ">DateTime</span>.UtcNow)
+        });
+
+        <span class="kw">await</span> Task.<span class="fn">Delay</span>(<span class="num">1000</span>, context.CancellationToken);
+    }
+}</pre>
+    </div>
+    <div class="code-wrap">
+      <div class="code-label">Client</div>
+<pre><span class="kw">var</span> call = client.<span class="fn">StreamPrices</span>(<span class="kw">new</span> <span class="typ">SubscribeRequest</span> { Symbol = <span class="str">"AAPL"</span> });
+
+<span class="cmt">// Read from stream using async enumerable</span>
+<span class="kw">await foreach</span> (<span class="kw">var</span> update <span class="kw">in</span> call.ResponseStream.<span class="fn">ReadAllAsync</span>())
+{
+    Console.<span class="fn">WriteLine</span>(<span class="str">$"{update.Symbol}: ${update.Price}"</span>);
+}</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Client Streaming — Upload Chunks</h3>
+    <div class="code-wrap">
+      <div class="code-label">file_upload.proto</div>
+<pre><span class="kw">rpc</span> <span class="fn">UploadFile</span> (<span class="kw">stream</span> <span class="typ">FileChunk</span>) <span class="kw">returns</span> (<span class="typ">UploadResult</span>);</pre>
+    </div>
+    <div class="code-wrap">
+      <div class="code-label">Client</div>
+<pre><span class="kw">using var</span> call = client.<span class="fn">UploadFile</span>();
+
+<span class="cmt">// Stream file in 64KB chunks</span>
+<span class="kw">var</span> buffer = <span class="kw">new byte</span>[<span class="num">65536</span>];
+<span class="kw">int</span> bytesRead;
+
+<span class="kw">using var</span> fileStream = <span class="typ">File</span>.<span class="fn">OpenRead</span>(<span class="str">"largefile.zip"</span>);
+<span class="kw">while</span> ((bytesRead = <span class="kw">await</span> fileStream.<span class="fn">ReadAsync</span>(buffer)) > <span class="num">0</span>)
+{
+    <span class="kw">await</span> call.RequestStream.<span class="fn">WriteAsync</span>(<span class="kw">new</span> <span class="typ">FileChunk</span>
+    {
+        Content = <span class="typ">ByteString</span>.<span class="fn">CopyFrom</span>(buffer, <span class="num">0</span>, bytesRead)
+    });
+}
+
+<span class="cmt">// Signal done — mandatory!</span>
+<span class="kw">await</span> call.RequestStream.<span class="fn">CompleteAsync</span>();
+
+<span class="kw">var</span> result = <span class="kw">await</span> call;
+Console.<span class="fn">WriteLine</span>(<span class="str">$"Uploaded {result.BytesReceived} bytes"</span>);</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Bidirectional Streaming — Live Chat</h3>
+    <div class="code-wrap">
+      <div class="code-label">chat.proto</div>
+<pre><span class="kw">rpc</span> <span class="fn">Chat</span> (<span class="kw">stream</span> <span class="typ">ChatMessage</span>) <span class="kw">returns</span> (<span class="kw">stream</span> <span class="typ">ChatMessage</span>);</pre>
+    </div>
+    <div class="code-wrap">
+      <div class="code-label">Client — Send and Receive Concurrently</div>
+<pre><span class="kw">using var</span> call = client.<span class="fn">Chat</span>();
+
+<span class="cmt">// Read task — runs in background</span>
+<span class="kw">var</span> readTask = <span class="typ">Task</span>.<span class="fn">Run</span>(<span class="kw">async</span> () =>
+{
+    <span class="kw">await foreach</span> (<span class="kw">var</span> msg <span class="kw">in</span> call.ResponseStream.<span class="fn">ReadAllAsync</span>())
+        Console.<span class="fn">WriteLine</span>(<span class="str">$"[{msg.From}]: {msg.Text}"</span>);
+});
+
+<span class="cmt">// Write messages from console</span>
+<span class="kw">string</span>? line;
+<span class="kw">while</span> ((line = Console.<span class="fn">ReadLine</span>()) != <span class="kw">null</span>)
+{
+    <span class="kw">await</span> call.RequestStream.<span class="fn">WriteAsync</span>(<span class="kw">new</span> <span class="typ">ChatMessage</span>
+    {
+        From = <span class="str">"Indhu"</span>,
+        Text = line
+    });
+}
+
+<span class="kw">await</span> call.RequestStream.<span class="fn">CompleteAsync</span>();
+<span class="kw">await</span> readTask;</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ S6: AUTH ══════════ -->
+<div id="s6" class="section">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(239,68,68,.15)">🔐</div>
+    <h2>Authentication &amp; Security <span>Intermediate</span></h2>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <h3>TLS/SSL (Transport Security)</h3>
+      <div class="code-wrap">
+        <div class="code-label">Server appsettings.json</div>
+<pre>{
+  <span class="str">"Kestrel"</span>: {
+    <span class="str">"Endpoints"</span>: {
+      <span class="str">"Grpc"</span>: {
+        <span class="str">"Url"</span>: <span class="str">"https://0.0.0.0:7042"</span>,
+        <span class="str">"Protocols"</span>: <span class="str">"Http2"</span>
+      }
+    }
+  }
+}</pre>
+      </div>
+      <div class="code-wrap">
+        <div class="code-label">Client (insecure dev only)</div>
+<pre><span class="cmt">// DEV ONLY — skip TLS validation</span>
+<span class="kw">var</span> channel = <span class="typ">GrpcChannel</span>.<span class="fn">ForAddress</span>(
+    <span class="str">"http://localhost:5000"</span>,
+    <span class="kw">new</span> <span class="typ">GrpcChannelOptions</span> {
+        HttpHandler = <span class="kw">new</span> <span class="typ">HttpClientHandler</span> {
+            ServerCertificateCustomValidationCallback =
+                <span class="typ">HttpClientHandler</span>
+                    .DangerousAcceptAnyServerCertificateValidator
+        }
+    });</pre>
+      </div>
+    </div>
+    <div class="card">
+      <h3>JWT Bearer Auth</h3>
+      <div class="code-wrap">
+        <div class="code-label">Client — Send JWT</div>
+<pre><span class="kw">var</span> credentials = <span class="typ">CallCredentials</span>.<span class="fn">FromInterceptor</span>(
+    <span class="kw">async</span> (context, metadata) =>
+    {
+        <span class="kw">var</span> token = <span class="kw">await</span> tokenService.<span class="fn">GetTokenAsync</span>();
+        metadata.<span class="fn">Add</span>(<span class="str">"Authorization"</span>, <span class="str">$"Bearer {token}"</span>);
+    });
+
+<span class="kw">var</span> channel = <span class="typ">GrpcChannel</span>.<span class="fn">ForAddress</span>(<span class="str">"https://server"</span>,
+    <span class="kw">new</span> <span class="typ">GrpcChannelOptions</span> {
+        Credentials = <span class="typ">ChannelCredentials</span>.<span class="fn">Create</span>(
+            <span class="kw">new</span> <span class="typ">SslCredentials</span>(), credentials)
+    });</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Server-Side Authorization</h3>
+    <div class="code-wrap">
+      <div class="code-label">Program.cs</div>
+<pre><span class="cmt">// Add JWT auth middleware</span>
+builder.Services.<span class="fn">AddAuthentication</span>()
+    .<span class="fn">AddJwtBearer</span>(options =>
+    {
+        options.Authority = <span class="str">"https://identity-server"</span>;
+        options.Audience  = <span class="str">"grpc-api"</span>;
+    });
+
+builder.Services.<span class="fn">AddAuthorization</span>();
+
+<span class="cmt">// In service registration</span>
+builder.Services.<span class="fn">AddGrpc</span>(options =>
+{
+    <span class="cmt">// Enable auth globally</span>
+    options.EnableDetailedErrors = <span class="kw">true</span>;
+});
+
+app.<span class="fn">UseAuthentication</span>();
+app.<span class="fn">UseAuthorization</span>();</pre>
+    </div>
+    <div class="code-wrap">
+      <div class="code-label">GreeterService.cs — Authorize Attribute</div>
+<pre>[<span class="typ">Authorize</span>]                   <span class="cmt">// whole service requires auth</span>
+<span class="kw">public class</span> <span class="typ">GreeterService</span> : <span class="typ">Greeter.GreeterBase</span>
+{
+    [<span class="typ">AllowAnonymous</span>]           <span class="cmt">// override for specific method</span>
+    <span class="kw">public override</span> <span class="typ">Task</span>&lt;<span class="typ">HelloReply</span>&gt; <span class="fn">SayHello</span>(...) { ... }
+
+    [<span class="typ">Authorize</span>(Roles = <span class="str">"Admin"</span>)]  <span class="cmt">// role-based</span>
+    <span class="kw">public override</span> <span class="typ">Task</span>&lt;<span class="typ">AdminReply</span>&gt; <span class="fn">AdminAction</span>(...) { ... }
+
+    <span class="kw">public override</span> <span class="typ">Task</span>&lt;<span class="typ">SecureReply</span>&gt; <span class="fn">SecureCall</span>(
+        <span class="typ">SecureRequest</span> req, <span class="typ">ServerCallContext</span> context)
+    {
+        <span class="cmt">// Get the authenticated user</span>
+        <span class="kw">var</span> user = context.<span class="fn">GetHttpContext</span>().User;
+        <span class="kw">var</span> name = user.Identity?.Name;
+        <span class="kw">return</span> <span class="typ">Task</span>.<span class="fn">FromResult</span>(<span class="kw">new</span> <span class="typ">SecureReply</span> { UserId = name });
+    }
+}</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Mutual TLS (mTLS) — Service-to-Service</h3>
+    <div class="code-wrap">
+      <div class="code-label">Client certificate auth</div>
+<pre><span class="kw">var</span> clientCert = <span class="kw">new</span> <span class="typ">X509Certificate2</span>(<span class="str">"client.pfx"</span>, <span class="str">"password"</span>);
+
+<span class="kw">var</span> handler = <span class="kw">new</span> <span class="typ">HttpClientHandler</span>();
+handler.ClientCertificates.<span class="fn">Add</span>(clientCert);
+
+<span class="kw">var</span> channel = <span class="typ">GrpcChannel</span>.<span class="fn">ForAddress</span>(<span class="str">"https://server"</span>,
+    <span class="kw">new</span> <span class="typ">GrpcChannelOptions</span> { HttpHandler = handler });</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ S7: INTERCEPTORS ══════════ -->
+<div id="s7" class="section">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(124,58,237,.15)">⚙️</div>
+    <h2>Interceptors (Middleware) <span>Advanced — Cross-Cutting Concerns</span></h2>
+  </div>
+
+  <div class="callout callout-info">
+    <div class="callout-icon">🧩</div>
+    <div class="callout-text">
+      <strong>Interceptors = gRPC Middleware</strong>
+      Intercept every RPC call for logging, auth validation, retry logic, metrics, or correlation IDs — without touching service code.
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Server Interceptor — Logging + Timing</h3>
+    <div class="code-wrap">
+      <div class="code-label">LoggingInterceptor.cs</div>
+<pre><span class="kw">using</span> Grpc.Core;
+<span class="kw">using</span> Grpc.Core.Interceptors;
+
+<span class="kw">public class</span> <span class="typ">LoggingInterceptor</span> : <span class="typ">Interceptor</span>
+{
+    <span class="kw">private readonly</span> <span class="typ">ILogger</span>&lt;<span class="typ">LoggingInterceptor</span>&gt; _logger;
+
+    <span class="kw">public</span> <span class="fn">LoggingInterceptor</span>(<span class="typ">ILogger</span>&lt;<span class="typ">LoggingInterceptor</span>&gt; logger)
+        => _logger = logger;
+
+    <span class="cmt">// Intercept unary calls</span>
+    <span class="kw">public override async</span> <span class="typ">Task</span>&lt;<span class="typ">TResponse</span>&gt; <span class="fn">UnaryServerHandler</span>&lt;<span class="typ">TRequest</span>, <span class="typ">TResponse</span>&gt;(
+        <span class="typ">TRequest</span> request,
+        <span class="typ">ServerCallContext</span> context,
+        <span class="typ">UnaryServerMethod</span>&lt;<span class="typ">TRequest</span>, <span class="typ">TResponse</span>&gt; continuation)
+        <span class="kw">where</span> <span class="typ">TRequest</span> : <span class="kw">class</span>
+        <span class="kw">where</span> <span class="typ">TResponse</span> : <span class="kw">class</span>
+    {
+        <span class="kw">var</span> sw = <span class="typ">Stopwatch</span>.<span class="fn">StartNew</span>();
+        _logger.<span class="fn">LogInformation</span>(<span class="str">"➡ {Method}"</span>, context.Method);
+
+        <span class="kw">try</span>
+        {
+            <span class="kw">var</span> response = <span class="kw">await</span> <span class="fn">continuation</span>(request, context);
+            _logger.<span class="fn">LogInformation</span>(<span class="str">"✅ {Method} in {Ms}ms"</span>,
+                context.Method, sw.ElapsedMilliseconds);
+            <span class="kw">return</span> response;
+        }
+        <span class="kw">catch</span> (<span class="typ">Exception</span> ex)
+        {
+            _logger.<span class="fn">LogError</span>(ex, <span class="str">"❌ {Method} failed"</span>, context.Method);
+            <span class="kw">throw</span>;
+        }
+    }
+}</pre>
+    </div>
+    <div class="code-wrap">
+      <div class="code-label">Program.cs — Register Interceptor</div>
+<pre>builder.Services.<span class="fn">AddGrpc</span>(options =>
+{
+    options.Interceptors.<span class="fn">Add</span>&lt;<span class="typ">LoggingInterceptor</span>&gt;();
+});
+
+<span class="cmt">// Or per-service:</span>
+app.<span class="fn">MapGrpcService</span>&lt;<span class="typ">GreeterService</span>&gt;()
+   .<span class="fn">AddInterceptor</span>&lt;<span class="typ">LoggingInterceptor</span>&gt;();</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Client Interceptor — Add Auth Header</h3>
+    <div class="code-wrap">
+      <div class="code-label">AuthInterceptor.cs</div>
+<pre><span class="kw">public class</span> <span class="typ">AuthInterceptor</span> : <span class="typ">Interceptor</span>
+{
+    <span class="kw">private readonly</span> <span class="typ">ITokenProvider</span> _tokens;
+
+    <span class="kw">public</span> <span class="fn">AuthInterceptor</span>(<span class="typ">ITokenProvider</span> tokens) => _tokens = tokens;
+
+    <span class="kw">public override</span> <span class="typ">AsyncUnaryCall</span>&lt;<span class="typ">TResponse</span>&gt;
+        <span class="fn">AsyncUnaryCall</span>&lt;<span class="typ">TRequest</span>, <span class="typ">TResponse</span>&gt;(
+            <span class="typ">TRequest</span> request,
+            <span class="typ">ClientInterceptorContext</span>&lt;<span class="typ">TRequest</span>, <span class="typ">TResponse</span>&gt; context,
+            <span class="typ">AsyncUnaryCallContinuation</span>&lt;<span class="typ">TRequest</span>, <span class="typ">TResponse</span>&gt; continuation)
+        <span class="kw">where</span> <span class="typ">TRequest</span> : <span class="kw">class</span>
+        <span class="kw">where</span> <span class="typ">TResponse</span> : <span class="kw">class</span>
+    {
+        <span class="kw">var</span> headers = <span class="kw">new</span> <span class="typ">Metadata</span>();
+        headers.<span class="fn">Add</span>(<span class="str">"authorization"</span>, <span class="str">$"Bearer {_tokens.GetToken()}"</span>);
+
+        <span class="kw">var</span> newContext = <span class="kw">new</span> <span class="typ">ClientInterceptorContext</span>&lt;<span class="typ">TRequest</span>, <span class="typ">TResponse</span>&gt;(
+            context.Method, context.Host,
+            context.Options.<span class="fn">WithHeaders</span>(headers));
+
+        <span class="kw">return</span> <span class="fn">continuation</span>(request, newContext);
+    }
+}
+
+<span class="cmt">// Register on client channel:</span>
+<span class="kw">var</span> invoker = channel.<span class="fn">Intercept</span>(<span class="kw">new</span> <span class="typ">AuthInterceptor</span>(tokenProvider));
+<span class="kw">var</span> client  = <span class="kw">new</span> <span class="typ">Greeter.GreeterClient</span>(invoker);</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ S8: LOAD BALANCING ══════════ -->
+<div id="s8" class="section">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(245,158,11,.15)">🔄</div>
+    <h2>Load Balancing <span>Advanced — High Availability</span></h2>
+  </div>
+
+  <div class="callout callout-warn">
+    <div class="callout-icon">⚠️</div>
+    <div class="callout-text">
+      <strong>L7 vs L4 Load Balancing</strong>
+      gRPC runs on HTTP/2 with long-lived connections. Traditional L4 load balancers (TCP) can't distribute individual RPCs — they only balance new connections. Use <strong>L7 (application-layer) load balancing</strong> like Envoy, Nginx, or .NET's built-in client-side balancing.
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Client-Side Load Balancing</h3>
+    <div class="code-wrap">
+      <div class="code-label">Program.cs</div>
+<pre><span class="cmt">// Round-robin across multiple server addresses</span>
+<span class="kw">var</span> channel = <span class="typ">GrpcChannel</span>.<span class="fn">ForAddress</span>(<span class="str">"static:///"</span>,
+    <span class="kw">new</span> <span class="typ">GrpcChannelOptions</span>
+    {
+        Credentials = <span class="typ">ChannelCredentials</span>.Insecure,
+        ServiceConfig = <span class="kw">new</span> <span class="typ">ServiceConfig</span>
+        {
+            LoadBalancingConfigs = {
+                <span class="kw">new</span> <span class="typ">RoundRobinConfig</span>()
+            }
+        }
+    });
+
+<span class="cmt">// Register multiple endpoints</span>
+<span class="kw">var</span> addresses = <span class="kw">new</span>[] {
+    <span class="str">"https://server1:7042"</span>,
+    <span class="str">"https://server2:7042"</span>,
+    <span class="str">"https://server3:7042"</span>
+};
+
+builder.Services
+    .<span class="fn">AddGrpcClient</span>&lt;<span class="typ">Greeter.GreeterClient</span>&gt;()
+    .<span class="fn">ConfigureChannel</span>(options =>
+    {
+        options.ServiceConfig = <span class="kw">new</span> <span class="typ">ServiceConfig</span>
+        {
+            LoadBalancingConfigs = { <span class="kw">new</span> <span class="typ">RoundRobinConfig</span>() }
+        };
+    });</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Envoy as L7 Proxy</h3>
+    <div class="diagram">
+┌────────────┐      gRPC        ┌────────────┐
+│  Client    │─────────────────►│   Envoy    │
+│ (C# App)   │                  │  (L7 LB)   │
+└────────────┘                  └─────┬──────┘
+                                      │ distributes each RPC
+                         ┌────────────┼────────────┐
+                         ▼            ▼             ▼
+                    ┌─────────┐  ┌─────────┐  ┌─────────┐
+                    │Server 1 │  │Server 2 │  │Server 3 │
+                    └─────────┘  └─────────┘  └─────────┘</div>
+    <div class="code-wrap">
+      <div class="code-label">envoy.yaml (key parts)</div>
+<pre>cluster_name: grpc_backend
+http2_protocol_options: {}   <span class="cmt"># ← enables HTTP/2</span>
+load_assignment:
+  endpoints:
+    - lb_endpoints:
+        - endpoint:
+            address: { socket_address: { address: server1, port_value: 7042 }}
+        - endpoint:
+            address: { socket_address: { address: server2, port_value: 7042 }}</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Retry Policy</h3>
+    <div class="code-wrap">
+<pre><span class="kw">var</span> channel = <span class="typ">GrpcChannel</span>.<span class="fn">ForAddress</span>(<span class="str">"https://server"</span>,
+    <span class="kw">new</span> <span class="typ">GrpcChannelOptions</span>
+    {
+        ServiceConfig = <span class="kw">new</span> <span class="typ">ServiceConfig</span>
+        {
+            MethodConfigs = {
+                <span class="kw">new</span> <span class="typ">MethodConfig</span>
+                {
+                    Names = { <span class="typ">MethodName</span>.Default },  <span class="cmt">// all methods</span>
+                    RetryPolicy = <span class="kw">new</span> <span class="typ">RetryPolicy</span>
+                    {
+                        MaxAttempts          = <span class="num">5</span>,
+                        InitialBackoff       = <span class="typ">TimeSpan</span>.<span class="fn">FromSeconds</span>(<span class="num">1</span>),
+                        MaxBackoff           = <span class="typ">TimeSpan</span>.<span class="fn">FromSeconds</span>(<span class="num">30</span>),
+                        BackoffMultiplier    = <span class="num">1.5</span>,
+                        RetryableStatusCodes = { <span class="typ">StatusCode</span>.Unavailable }
+                    }
+                }
+            }
+        }
+    });</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ S9: DEADLINES & ERRORS ══════════ -->
+<div id="s9" class="section">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(239,68,68,.15)">📊</div>
+    <h2>Deadlines, Cancellation &amp; Error Handling <span>Intermediate</span></h2>
+  </div>
+
+  <div class="card">
+    <h3>Setting Deadlines (Client)</h3>
+    <div class="code-wrap">
+<pre><span class="cmt">// ALWAYS set a deadline! Prevents hanging forever</span>
+<span class="kw">var</span> reply = <span class="kw">await</span> client.<span class="fn">SayHelloAsync</span>(
+    <span class="kw">new</span> <span class="typ">HelloRequest</span> { Name = <span class="str">"Indhu"</span> },
+    deadline: <span class="typ">DateTime</span>.UtcNow.<span class="fn">AddSeconds</span>(<span class="num">5</span>)  <span class="cmt">// 5 second timeout</span>
+);
+
+<span class="cmt">// With CallOptions for full control</span>
+<span class="kw">var</span> options = <span class="kw">new</span> <span class="typ">CallOptions</span>(
+    headers:  <span class="kw">new</span> <span class="typ">Metadata</span> { { <span class="str">"x-request-id"</span>, <span class="str">"123"</span> } },
+    deadline: <span class="typ">DateTime</span>.UtcNow.<span class="fn">AddSeconds</span>(<span class="num">10</span>),
+    cancellationToken: cts.Token
+);
+<span class="kw">var</span> reply = <span class="kw">await</span> client.<span class="fn">SayHelloAsync</span>(request, options);</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>gRPC Status Codes</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Code</th><th>Meaning</th><th>When to Use</th></tr>
+        <tr><td><span class="tag tag-green">OK</span></td><td>Success</td><td>Normal completion</td></tr>
+        <tr><td><span class="tag tag-orange">INVALID_ARGUMENT</span></td><td>Bad input</td><td>Validation failed</td></tr>
+        <tr><td><span class="tag tag-orange">NOT_FOUND</span></td><td>Resource missing</td><td>Entity doesn't exist</td></tr>
+        <tr><td><span class="tag tag-orange">ALREADY_EXISTS</span></td><td>Duplicate</td><td>Create conflict</td></tr>
+        <tr><td><span class="tag tag-orange">PERMISSION_DENIED</span></td><td>No access</td><td>Authorization fail</td></tr>
+        <tr><td><span class="tag tag-orange">UNAUTHENTICATED</span></td><td>Not logged in</td><td>Auth required</td></tr>
+        <tr><td><span class="tag tag-blue">DEADLINE_EXCEEDED</span></td><td>Timeout</td><td>Too slow</td></tr>
+        <tr><td><span class="tag tag-blue">CANCELLED</span></td><td>Aborted</td><td>Client cancelled</td></tr>
+        <tr><td><span class="tag tag-purple">UNAVAILABLE</span></td><td>Server down</td><td>Retry-able error</td></tr>
+        <tr><td><span class="tag tag-purple">INTERNAL</span></td><td>Server crash</td><td>Unexpected error</td></tr>
+        <tr><td><span class="tag tag-purple">RESOURCE_EXHAUSTED</span></td><td>Rate limited</td><td>Too many requests</td></tr>
+        <tr><td><span class="tag tag-purple">UNIMPLEMENTED</span></td><td>Not coded</td><td>Method not implemented</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Throwing Errors on Server</h3>
+    <div class="code-wrap">
+<pre><span class="kw">public override</span> <span class="typ">Task</span>&lt;<span class="typ">OrderResponse</span>&gt; <span class="fn">GetOrder</span>(
+    <span class="typ">GetOrderRequest</span> request, <span class="typ">ServerCallContext</span> context)
+{
+    <span class="kw">if</span> (<span class="typ">string</span>.<span class="fn">IsNullOrEmpty</span>(request.OrderId))
+    {
+        <span class="cmt">// Throw RpcException with proper status code</span>
+        <span class="kw">throw new</span> <span class="typ">RpcException</span>(<span class="kw">new</span> <span class="typ">Status</span>(
+            <span class="typ">StatusCode</span>.InvalidArgument,
+            <span class="str">"OrderId cannot be empty"</span>));
+    }
+
+    <span class="kw">var</span> order = _db.<span class="fn">FindOrder</span>(request.OrderId);
+    <span class="kw">if</span> (order == <span class="kw">null</span>)
+    {
+        <span class="kw">throw new</span> <span class="typ">RpcException</span>(<span class="kw">new</span> <span class="typ">Status</span>(
+            <span class="typ">StatusCode</span>.NotFound,
+            <span class="str">$"Order {request.OrderId} not found"</span>));
+    }
+
+    <span class="kw">return</span> <span class="typ">Task</span>.<span class="fn">FromResult</span>(<span class="fn">MapToResponse</span>(order));
+}</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Handling Errors on Client</h3>
+    <div class="code-wrap">
+<pre><span class="kw">try</span>
+{
+    <span class="kw">var</span> reply = <span class="kw">await</span> client.<span class="fn">GetOrderAsync</span>(request,
+        deadline: <span class="typ">DateTime</span>.UtcNow.<span class="fn">AddSeconds</span>(<span class="num">5</span>));
+}
+<span class="kw">catch</span> (<span class="typ">RpcException</span> ex) <span class="kw">when</span> (ex.StatusCode == <span class="typ">StatusCode</span>.NotFound)
+{
+    Console.<span class="fn">WriteLine</span>(<span class="str">"Order does not exist!"</span>);
+}
+<span class="kw">catch</span> (<span class="typ">RpcException</span> ex) <span class="kw">when</span> (ex.StatusCode == <span class="typ">StatusCode</span>.DeadlineExceeded)
+{
+    Console.<span class="fn">WriteLine</span>(<span class="str">"Server too slow — timed out!"</span>);
+}
+<span class="kw">catch</span> (<span class="typ">RpcException</span> ex) <span class="kw">when</span> (ex.StatusCode == <span class="typ">StatusCode</span>.Unavailable)
+{
+    Console.<span class="fn">WriteLine</span>(<span class="str">"Server down — retry later"</span>);
+}
+<span class="kw">catch</span> (<span class="typ">RpcException</span> ex)
+{
+    Console.<span class="fn">WriteLine</span>(<span class="str">$"gRPC Error: {ex.Status.Detail}"</span>);
+}</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Rich Error Details (google.rpc.Status)</h3>
+    <div class="code-wrap">
+      <div class="code-label">Server — Structured Error with Details</div>
+<pre><span class="kw">using</span> Google.Rpc;
+
+<span class="kw">var</span> badRequest = <span class="kw">new</span> <span class="typ">BadRequest</span>();
+badRequest.FieldViolations.<span class="fn">Add</span>(<span class="kw">new</span> <span class="typ">BadRequest.Types.FieldViolation</span>
+{
+    Field       = <span class="str">"email"</span>,
+    Description = <span class="str">"must be a valid email address"</span>
+});
+
+<span class="kw">var</span> status = <span class="kw">new</span> <span class="typ">Google.Rpc.Status</span>
+{
+    Code    = (<span class="kw">int</span>)<span class="typ">Code</span>.InvalidArgument,
+    Message = <span class="str">"Validation failed"</span>,
+    Details = { <span class="typ">Any</span>.<span class="fn">Pack</span>(badRequest) }
+};
+
+<span class="kw">throw</span> status.<span class="fn">ToRpcException</span>();</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ S10: TESTING ══════════ -->
+<div id="s10" class="section">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(16,185,129,.15)">🧪</div>
+    <h2>Testing gRPC Services <span>Intermediate</span></h2>
+  </div>
+
+  <div class="card">
+    <h3>Unit Testing with Moq</h3>
+    <div class="code-wrap">
+      <div class="code-label">GreeterService.Tests.cs</div>
+<pre><span class="kw">using</span> Grpc.Core;
+<span class="kw">using</span> Grpc.Core.Testing;
+<span class="kw">using</span> Moq;
+
+[<span class="typ">Fact</span>]
+<span class="kw">public async</span> <span class="typ">Task</span> <span class="fn">SayHello_ReturnsGreeting</span>()
+{
+    <span class="cmt">// Arrange</span>
+    <span class="kw">var</span> logger  = <span class="kw">new</span> <span class="typ">Mock</span>&lt;<span class="typ">ILogger</span>&lt;<span class="typ">GreeterService</span>&gt;&gt;();
+    <span class="kw">var</span> service = <span class="kw">new</span> <span class="typ">GreeterService</span>(logger.Object);
+
+    <span class="cmt">// Create a fake ServerCallContext</span>
+    <span class="kw">var</span> context = <span class="typ">TestServerCallContext</span>.<span class="fn">Create</span>(
+        method: <span class="str">"SayHello"</span>, host: <span class="str">"localhost"</span>,
+        deadline: <span class="typ">DateTime</span>.UtcNow.<span class="fn">AddMinutes</span>(<span class="num">1</span>),
+        requestHeaders: <span class="kw">new</span> <span class="typ">Metadata</span>(),
+        cancellationToken: <span class="typ">CancellationToken</span>.None,
+        peer: <span class="str">"127.0.0.1"</span>, authContext: <span class="kw">null</span>,
+        contextPropagationToken: <span class="kw">null</span>, writeHeadersFunc: <span class="kw">null</span>,
+        writeOptionsGetter: <span class="kw">null</span>, writeOptionsSetter: <span class="kw">null</span>);
+
+    <span class="cmt">// Act</span>
+    <span class="kw">var</span> result = <span class="kw">await</span> service.<span class="fn">SayHello</span>(
+        <span class="kw">new</span> <span class="typ">HelloRequest</span> { Name = <span class="str">"Indhu"</span> }, context);
+
+    <span class="cmt">// Assert</span>
+    Assert.<span class="fn">Equal</span>(<span class="str">"Hello, Indhu!"</span>, result.Message);
+    Assert.<span class="fn">True</span>(result.IsSuccess);
+}</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Integration Testing with WebApplicationFactory</h3>
+    <div class="code-wrap">
+<pre><span class="kw">public class</span> <span class="typ">GrpcIntegrationTest</span> : <span class="typ">IClassFixture</span>&lt;<span class="typ">WebApplicationFactory</span>&lt;<span class="typ">Program</span>&gt;&gt;
+{
+    <span class="kw">private readonly</span> <span class="typ">WebApplicationFactory</span>&lt;<span class="typ">Program</span>&gt; _factory;
+
+    <span class="kw">public</span> <span class="fn">GrpcIntegrationTest</span>(<span class="typ">WebApplicationFactory</span>&lt;<span class="typ">Program</span>&gt; factory)
+        => _factory = factory;
+
+    [<span class="typ">Fact</span>]
+    <span class="kw">public async</span> <span class="typ">Task</span> <span class="fn">SayHello_IntegrationTest</span>()
+    {
+        <span class="kw">var</span> client = _factory.<span class="fn">CreateDefaultClient</span>(
+            <span class="kw">new</span> <span class="typ">ResponseVersionHandler</span>());
+
+        <span class="kw">var</span> channel = <span class="typ">GrpcChannel</span>.<span class="fn">ForAddress</span>(<span class="str">"http://localhost"</span>,
+            <span class="kw">new</span> <span class="typ">GrpcChannelOptions</span> { HttpClient = client });
+
+        <span class="kw">var</span> greeter = <span class="kw">new</span> <span class="typ">Greeter.GreeterClient</span>(channel);
+        <span class="kw">var</span> reply   = <span class="kw">await</span> greeter.<span class="fn">SayHelloAsync</span>(
+            <span class="kw">new</span> <span class="typ">HelloRequest</span> { Name = <span class="str">"Test"</span> });
+
+        Assert.<span class="fn">Equal</span>(<span class="str">"Hello, Test!"</span>, reply.Message);
+    }
+}
+
+<span class="cmt">// Needed to force HTTP/2</span>
+<span class="kw">class</span> <span class="typ">ResponseVersionHandler</span> : <span class="typ">DelegatingHandler</span>
+{
+    <span class="kw">protected override async</span> <span class="typ">Task</span>&lt;<span class="typ">HttpResponseMessage</span>&gt; <span class="fn">SendAsync</span>(
+        <span class="typ">HttpRequestMessage</span> request, <span class="typ">CancellationToken</span> token)
+    {
+        request.Version = <span class="typ">HttpVersion</span>.Version20;
+        <span class="kw">return await</span> <span class="fn">base</span>.<span class="fn">SendAsync</span>(request, token);
+    }
+}</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>gRPCurl — Command Line Testing</h3>
+    <div class="code-wrap">
+<pre><span class="cmt"># Install grpcurl (cross-platform)</span>
+brew install grpcurl   <span class="cmt"># macOS</span>
+choco install grpcurl  <span class="cmt"># Windows</span>
+
+<span class="cmt"># List all services</span>
+grpcurl -plaintext localhost:5000 list
+
+<span class="cmt"># Describe a service</span>
+grpcurl -plaintext localhost:5000 describe greeter.Greeter
+
+<span class="cmt"># Call a method</span>
+grpcurl -plaintext -d '{"name":"Indhu"}' \
+  localhost:5000 greeter.Greeter/SayHello
+
+<span class="cmt"># With headers</span>
+grpcurl -plaintext \
+  -H 'authorization: Bearer mytoken' \
+  -d '{"name":"Indhu"}' \
+  localhost:5000 greeter.Greeter/SayHello</pre>
+    </div>
+    <div class="callout callout-tip" style="margin-top:12px">
+      <div class="callout-icon">💡</div>
+      <div class="callout-text">
+        <strong>Enable Server Reflection</strong>
+        Add <code>builder.Services.AddGrpcReflection();</code> and <code>app.MapGrpcReflectionService();</code> to allow grpcurl to discover services without a .proto file.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ S11: gRPC-WEB ══════════ -->
+<div id="s11" class="section">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(0,212,255,.15)">🌐</div>
+    <h2>gRPC-Web &amp; Transcoding <span>Advanced — Browser Support</span></h2>
+  </div>
+
+  <div class="callout callout-warn">
+    <div class="callout-icon">🌐</div>
+    <div class="callout-text">
+      <strong>Browsers can't use gRPC directly</strong>
+      Browsers don't support HTTP/2 trailers required by gRPC. gRPC-Web is a proxy layer that works around this limitation. For full REST compatibility, use HTTP API transcoding.
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Setup gRPC-Web in ASP.NET Core</h3>
+    <div class="code-wrap">
+<pre>dotnet add package Grpc.AspNetCore.Web</pre>
+    </div>
+    <div class="code-wrap">
+      <div class="code-label">Program.cs</div>
+<pre>builder.Services.<span class="fn">AddGrpc</span>();
+
+<span class="kw">var</span> app = builder.<span class="fn">Build</span>();
+
+<span class="cmt">// Must be before UseRouting/MapGrpcService</span>
+app.<span class="fn">UseGrpcWeb</span>();
+
+app.<span class="fn">MapGrpcService</span>&lt;<span class="typ">GreeterService</span>&gt;()
+   .<span class="fn">EnableGrpcWeb</span>();   <span class="cmt">// ← browser accessible!</span>
+
+app.<span class="fn">Run</span>();</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>HTTP API Transcoding — REST + gRPC at Once</h3>
+    <div class="code-wrap">
+      <div class="code-label">greet.proto</div>
+<pre><span class="kw">import</span> <span class="str">"google/api/annotations.proto"</span>;
+
+<span class="kw">service</span> <span class="typ">Greeter</span> {
+  <span class="kw">rpc</span> <span class="fn">SayHello</span> (<span class="typ">HelloRequest</span>) <span class="kw">returns</span> (<span class="typ">HelloReply</span>) {
+    option (google.api.http) = {
+      post: <span class="str">"/v1/hello"</span>          <span class="cmt">// REST endpoint</span>
+      body: <span class="str">"*"</span>
+    };
+  }
+
+  <span class="kw">rpc</span> <span class="fn">GetUser</span> (<span class="typ">GetUserRequest</span>) <span class="kw">returns</span> (<span class="typ">User</span>) {
+    option (google.api.http) = {
+      get: <span class="str">"/v1/users/{user_id}"</span>  <span class="cmt">// path parameter</span>
+    };
+  }
+}</pre>
+    </div>
+    <div class="code-wrap">
+      <div class="code-label">Program.cs</div>
+<pre>builder.Services.<span class="fn">AddGrpc</span>().<span class="fn">AddJsonTranscoding</span>();  <span class="cmt">// NuGet: Microsoft.AspNetCore.Grpc.JsonTranscoding</span>
+
+<span class="cmt">// Now works as BOTH gRPC AND REST:</span>
+<span class="cmt">// gRPC:  POST (protobuf) grpc://server/greeter.Greeter/SayHello</span>
+<span class="cmt">// REST:  POST (JSON)     https://server/v1/hello</span></pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Architecture Options</h3>
+    <div class="diagram">
+┌──────────┐                           ┌──────────────┐
+│ Browser  │──── gRPC-Web (HTTP/1.1)──►│ Envoy Proxy  │──── gRPC ──►│ gRPC Server │
+│ (JS/TS)  │                           │ (translates) │             └─────────────┘
+└──────────┘                           └──────────────┘
+
+─ OR ─
+
+┌──────────┐                           ┌────────────────────────────┐
+│ Browser  │──── REST JSON (HTTP/1.1)──►│ ASP.NET Core gRPC Server  │
+│ (JS/TS)  │                           │ (JSON Transcoding enabled) │
+└──────────┘                           └────────────────────────────┘</div>
+  </div>
+</div>
+
+<!-- ══════════ S12: PRODUCTION ══════════ -->
+<div id="s12" class="section">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(239,68,68,.15)">🏭</div>
+    <h2>Production Best Practices <span>Expert</span></h2>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <h3>Channel &amp; Connection Management</h3>
+      <div class="code-wrap">
+<pre><span class="cmt">// ✅ Reuse channels — they are expensive</span>
+<span class="cmt">// Register as singleton in DI</span>
+builder.Services.<span class="fn">AddSingleton</span>(sp =>
+{
+    <span class="kw">var</span> channel = <span class="typ">GrpcChannel</span>.<span class="fn">ForAddress</span>(<span class="str">"https://server"</span>,
+        <span class="kw">new</span> <span class="typ">GrpcChannelOptions</span>
+        {
+            <span class="cmt">// Connection pool settings</span>
+            HttpHandler = <span class="kw">new</span> <span class="typ">SocketsHttpHandler</span>
+            {
+                PooledConnectionIdleTimeout    = <span class="typ">TimeSpan</span>.<span class="prop">Infinite</span>,
+                KeepAlivePingDelay             = <span class="typ">TimeSpan</span>.<span class="fn">FromSeconds</span>(<span class="num">60</span>),
+                KeepAlivePingTimeout           = <span class="typ">TimeSpan</span>.<span class="fn">FromSeconds</span>(<span class="num">30</span>),
+                EnableMultipleHttp2Connections = <span class="kw">true</span>
+            }
+        });
+    <span class="kw">return</span> channel;
+});</pre>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Health Checks</h3>
+      <div class="code-wrap">
+<pre>dotnet add package Grpc.HealthCheck</pre>
+      </div>
+      <div class="code-wrap">
+<pre><span class="cmt">// Server</span>
+builder.Services.<span class="fn">AddGrpcHealthChecks</span>()
+    .<span class="fn">AddCheck</span>&lt;<span class="typ">DbHealthCheck</span>&gt;(<span class="str">"database"</span>);
+
+app.<span class="fn">MapGrpcHealthChecksService</span>();
+
+<span class="cmt">// Client check</span>
+<span class="kw">var</span> healthClient = <span class="kw">new</span>
+    <span class="typ">Health.HealthClient</span>(channel);
+<span class="kw">var</span> response = <span class="kw">await</span> healthClient.<span class="fn">CheckAsync</span>(
+    <span class="kw">new</span> <span class="typ">HealthCheckRequest</span>
+    {
+        Service = <span class="str">"greeter.Greeter"</span>
+    });</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Observability — OpenTelemetry</h3>
+    <div class="code-wrap">
+<pre>dotnet add package OpenTelemetry.Instrumentation.GrpcNetClient
+dotnet add package OpenTelemetry.Instrumentation.AspNetCore</pre>
+    </div>
+    <div class="code-wrap">
+<pre>builder.Services.<span class="fn">AddOpenTelemetry</span>()
+    .<span class="fn">WithTracing</span>(tracing =>
+    {
+        tracing
+            .<span class="fn">AddAspNetCoreInstrumentation</span>()      <span class="cmt">// server spans</span>
+            .<span class="fn">AddGrpcClientInstrumentation</span>()     <span class="cmt">// client spans</span>
+            .<span class="fn">AddJaegerExporter</span>();               <span class="cmt">// send to Jaeger</span>
+    })
+    .<span class="fn">WithMetrics</span>(metrics =>
+    {
+        metrics
+            .<span class="fn">AddAspNetCoreInstrumentation</span>()
+            .<span class="fn">AddPrometheusExporter</span>();           <span class="cmt">// Prometheus scraping</span>
+    });</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Message Size &amp; Performance Tuning</h3>
+    <div class="code-wrap">
+<pre>builder.Services.<span class="fn">AddGrpc</span>(options =>
+{
+    <span class="cmt">// Max receive message size (default 4MB)</span>
+    options.MaxReceiveMessageSize = <span class="num">16</span> * <span class="num">1024</span> * <span class="num">1024</span>;  <span class="cmt">// 16MB</span>
+
+    <span class="cmt">// Max send message size (default unlimited)</span>
+    options.MaxSendMessageSize    = <span class="num">16</span> * <span class="num">1024</span> * <span class="num">1024</span>;
+
+    <span class="cmt">// Enable response compression</span>
+    options.ResponseCompressionLevel    = <span class="typ">CompressionLevel</span>.Optimal;
+    options.ResponseCompressionAlgorithm = <span class="str">"gzip"</span>;
+});</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Production Checklist</h3>
+    <ul class="checklist">
+      <li>TLS enabled on all channels (never plaintext in prod)</li>
+      <li>Deadlines set on every client call (prevents hangs)</li>
+      <li>Retry policy configured for transient errors (UNAVAILABLE)</li>
+      <li>Health check endpoint exposed for load balancers</li>
+      <li>OpenTelemetry tracing + metrics enabled</li>
+      <li>Channel reused (singleton), not created per-request</li>
+      <li>Message size limits configured explicitly</li>
+      <li>Response compression enabled for large payloads</li>
+      <li>Interceptors for logging, auth, and correlation IDs</li>
+      <li>Rate limiting applied at gateway level</li>
+      <li>Proto field numbers never reused after deletion</li>
+      <li>Reflection disabled in production</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>Schema Evolution — Backward Compatibility</h3>
+    <div class="grid-2">
+      <div>
+        <h4 style="color:var(--accent3);margin-bottom:8px">✅ Safe Changes</h4>
+        <ul class="checklist">
+          <li>Add new fields (any type)</li>
+          <li>Add new RPC methods</li>
+          <li>Add new enum values</li>
+          <li>Change field name (number stays)</li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="color:var(--danger);margin-bottom:8px">❌ Breaking Changes</h4>
+        <ul class="checklist" style="--accent3:#ef4444">
+          <li>Change field numbers</li>
+          <li>Change field types</li>
+          <li>Remove required fields</li>
+          <li>Change RPC signatures</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ S13: CHEATSHEET ══════════ -->
+<div id="s13" class="section">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(16,185,129,.15)">📋</div>
+    <h2>Quick Reference Cheatsheet <span>All Levels</span></h2>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <h3>Proto Keywords</h3>
+      <div class="table-wrap">
+        <table>
+          <tr><th>Keyword</th><th>Purpose</th></tr>
+          <tr><td><code>syntax</code></td><td>proto3 version declaration</td></tr>
+          <tr><td><code>service</code></td><td>Define RPC service</td></tr>
+          <tr><td><code>rpc</code></td><td>Define a method</td></tr>
+          <tr><td><code>message</code></td><td>Define data type</td></tr>
+          <tr><td><code>stream</code></td><td>Enable streaming</td></tr>
+          <tr><td><code>repeated</code></td><td>List/array field</td></tr>
+          <tr><td><code>map</code></td><td>Dictionary field</td></tr>
+          <tr><td><code>enum</code></td><td>Enumeration type</td></tr>
+          <tr><td><code>import</code></td><td>Include other .proto</td></tr>
+          <tr><td><code>package</code></td><td>Namespace grouping</td></tr>
+          <tr><td><code>reserved</code></td><td>Block field numbers</td></tr>
+          <tr><td><code>option</code></td><td>File-level settings</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <h3>C# Client Quick Reference</h3>
+      <div class="code-wrap">
+<pre><span class="cmt">// Create channel</span>
+<span class="kw">var</span> ch = <span class="typ">GrpcChannel</span>.<span class="fn">ForAddress</span>(<span class="str">"https://host"</span>);
+
+<span class="cmt">// Create client</span>
+<span class="kw">var</span> c = <span class="kw">new</span> <span class="typ">MyService.MyServiceClient</span>(ch);
+
+<span class="cmt">// Unary call</span>
+<span class="kw">var</span> r = <span class="kw">await</span> c.<span class="fn">MethodAsync</span>(request);
+
+<span class="cmt">// With options</span>
+<span class="kw">var</span> r = <span class="kw">await</span> c.<span class="fn">MethodAsync</span>(req,
+    deadline: <span class="typ">DateTime</span>.UtcNow.<span class="fn">AddSeconds</span>(<span class="num">5</span>));
+
+<span class="cmt">// Server stream</span>
+<span class="kw">var</span> call = c.<span class="fn">ServerStream</span>(req);
+<span class="kw">await foreach</span> (<span class="kw">var</span> x <span class="kw">in</span> call.ResponseStream.<span class="fn">ReadAllAsync</span>()) { }
+
+<span class="cmt">// Client stream</span>
+<span class="kw">using var</span> call = c.<span class="fn">ClientStream</span>();
+<span class="kw">await</span> call.RequestStream.<span class="fn">WriteAsync</span>(msg);
+<span class="kw">await</span> call.RequestStream.<span class="fn">CompleteAsync</span>();
+<span class="kw">var</span> result = <span class="kw">await</span> call;
+
+<span class="cmt">// Bidi stream</span>
+<span class="kw">using var</span> call = c.<span class="fn">BidiStream</span>();
+<span class="cmt">// Write: call.RequestStream.WriteAsync(msg)</span>
+<span class="cmt">// Read:  call.ResponseStream.ReadAllAsync()</span></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>RPC Pattern Decision Guide</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Use Case</th><th>Pattern</th><th>Proto Signature</th></tr>
+        <tr><td>CRUD operations, auth</td><td><span class="tag tag-green">Unary</span></td><td><code>rpc M(Req) returns (Res)</code></td></tr>
+        <tr><td>Live feeds, notifications, large results</td><td><span class="tag tag-blue">Server Stream</span></td><td><code>rpc M(Req) returns (stream Res)</code></td></tr>
+        <tr><td>File upload, batch insert</td><td><span class="tag tag-purple">Client Stream</span></td><td><code>rpc M(stream Req) returns (Res)</code></td></tr>
+        <tr><td>Chat, real-time collaboration</td><td><span class="tag tag-orange">Bidi Stream</span></td><td><code>rpc M(stream Req) returns (stream Res)</code></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>NuGet Package Reference</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Package</th><th>When to Use</th></tr>
+        <tr><td><code>Grpc.AspNetCore</code></td><td>Server project (includes all server deps)</td></tr>
+        <tr><td><code>Grpc.Net.Client</code></td><td>Client project</td></tr>
+        <tr><td><code>Grpc.Tools</code></td><td>Code generation from .proto (both)</td></tr>
+        <tr><td><code>Google.Protobuf</code></td><td>Runtime serialization (both)</td></tr>
+        <tr><td><code>Grpc.AspNetCore.Web</code></td><td>gRPC-Web browser support</td></tr>
+        <tr><td><code>Grpc.HealthCheck</code></td><td>Health check protocol</td></tr>
+        <tr><td><code>Microsoft.AspNetCore.Grpc.JsonTranscoding</code></td><td>REST transcoding</td></tr>
+        <tr><td><code>Grpc.Net.ClientFactory</code></td><td>DI factory pattern</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Common Mistakes &amp; Fixes</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Mistake</th><th>Fix</th></tr>
+        <tr><td>No deadline set</td><td>Always pass <code>deadline: DateTime.UtcNow.AddSeconds(N)</code></td></tr>
+        <tr><td>Channel per request</td><td>Register channel/client as singleton</td></tr>
+        <tr><td>Reusing field numbers</td><td>Use <code>reserved</code> for deleted fields</td></tr>
+        <tr><td>HTTP/1.1 for gRPC</td><td>Set <code>Protocols = Http2</code> in Kestrel</td></tr>
+        <tr><td>No cancellation handling</td><td>Respect <code>context.CancellationToken</code> in loops</td></tr>
+        <tr><td>Forget <code>CompleteAsync()</code></td><td>Always call on client streams when done</td></tr>
+        <tr><td>Plain <code>Exception</code> thrown</td><td>Use <code>RpcException</code> with proper <code>StatusCode</code></td></tr>
+        <tr><td>L4 load balancer for gRPC</td><td>Use L7 (Envoy/NGINX) or client-side LB</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="card" style="background:linear-gradient(135deg,rgba(0,212,255,.07),rgba(124,58,237,.07));border-color:rgba(0,212,255,.3)">
+    <h3 style="color:#e2e8f0">📖 Learning Path Summary</h3>
+    <div class="flow" style="flex-direction:column;align-items:flex-start">
+      <div style="display:flex;align-items:center;gap:8px"><span class="pill pill-green" style="flex-shrink:0">🌱 Beginner</span> <span style="font-size:13px;color:#94a3b8">Understand what gRPC is, how proto files work, field types</span></div>
+      <div style="color:var(--muted);padding-left:20px;font-size:12px">↓</div>
+      <div style="display:flex;align-items:center;gap:8px"><span class="pill pill-blue" style="flex-shrink:0">📘 Basic</span> <span style="font-size:13px;color:#94a3b8">Setup .NET project, implement unary RPC server + client, handle errors</span></div>
+      <div style="color:var(--muted);padding-left:20px;font-size:12px">↓</div>
+      <div style="display:flex;align-items:center;gap:8px"><span class="pill pill-purple" style="flex-shrink:0">⚙️ Intermediate</span> <span style="font-size:13px;color:#94a3b8">Streaming patterns, auth/JWT, deadlines, testing with grpcurl</span></div>
+      <div style="color:var(--muted);padding-left:20px;font-size:12px">↓</div>
+      <div style="display:flex;align-items:center;gap:8px"><span class="pill pill-orange" style="flex-shrink:0">🚀 Advanced</span> <span style="font-size:13px;color:#94a3b8">Interceptors, load balancing, retry policies, gRPC-Web, transcoding</span></div>
+      <div style="color:var(--muted);padding-left:20px;font-size:12px">↓</div>
+      <div style="display:flex;align-items:center;gap:8px"><span class="pill pill-red" style="flex-shrink:0">🔥 Expert</span> <span style="font-size:13px;color:#94a3b8">Production: health checks, OpenTelemetry, schema evolution, performance tuning</span></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<script>
+function show(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
