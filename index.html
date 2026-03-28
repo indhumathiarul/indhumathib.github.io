@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Indhu's Coding Corner — Tech Reference & Guides</title>
+<meta name="description" content="Practical tech guides on .NET, AWS, Cloud, Design Patterns and more by Indhumathi Baskar.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ── DESIGN TOKENS ── */
+:root {
+  --bg:       #faf9f7;
+  --bg2:      #f3f1ed;
+  --bg3:      #ede9e3;
+  --white:    #ffffff;
+  --border:   #e4dfd8;
+  --border2:  #d4cfc8;
+  --text:     #1a1814;
+  --text2:    #4a453f;
+  --muted:    #8c877f;
+  --accent:   #c96a2a;
+  --accent-l: #f5e6d8;
+  --accent2:  #2a7a5a;
+  --accent2-l:#d8f0e8;
+  --blue:     #2a5a9a;
+  --blue-l:   #dce8f5;
+  --serif:    'DM Serif Display', serif;
+  --sans:     'DM Sans', sans-serif;
+  --mono:     'JetBrains Mono', monospace;
+  --radius:   6px;
+  --shadow:   0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
+  --shadow-md:0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ── TOP NAV ── */
+.topnav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 300;
+  background: rgba(250,249,247,0.96);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  height: 56px;
+  display: flex; align-items: center;
+  padding: 0 20px;
+  gap: 16px;
+}
+.topnav-logo {
+  font-family: var(--serif);
+  font-size: 1.15rem;
+  color: var(--text);
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.topnav-logo em { color: var(--accent); font-style: normal; }
+.topnav-center { flex: 1; display: flex; align-items: center; gap: 4px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.topnav-center::-webkit-scrollbar { display: none; }
+.topnav-topic-btn {
+  white-space: nowrap; flex-shrink: 0;
+  background: none; border: none; cursor: pointer;
+  font-family: var(--sans); font-size: 0.8rem; font-weight: 500;
+  color: var(--text2); padding: 5px 10px; border-radius: 4px;
+  transition: all 0.15s; display: flex; align-items: center; gap: 5px;
+}
+.topnav-topic-btn:hover { background: var(--bg3); color: var(--text); }
+.topnav-topic-btn.active { background: var(--accent-l); color: var(--accent); }
+.topnav-topic-btn .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.hamburger { display: none; background: none; border: none; cursor: pointer; padding: 6px; flex-direction: column; gap: 4px; margin-left: auto; }
+.hamburger span { display: block; width: 20px; height: 2px; background: var(--text2); border-radius: 2px; transition: all 0.25s; }
+
+/* ── MOBILE DRAWER ── */
+.drawer {
+  display: none; position: fixed; top: 56px; left: 0; right: 0; bottom: 0;
+  background: var(--white); z-index: 250; overflow-y: auto;
+  padding: 16px;
+  flex-direction: column; gap: 4px;
+}
+.drawer.open { display: flex; }
+.drawer-topic { font-family: var(--sans); font-size: 0.9rem; font-weight: 600; color: var(--text); padding: 10px 12px; border-radius: var(--radius); cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.15s; }
+.drawer-topic:hover { background: var(--bg2); }
+.drawer-topic .arrow { font-size: 0.7rem; color: var(--muted); transition: transform 0.2s; }
+.drawer-topic.open .arrow { transform: rotate(90deg); }
+.drawer-subs { display: none; flex-direction: column; padding: 4px 0 4px 16px; gap: 2px; }
+.drawer-subs.open { display: flex; }
+.drawer-sub { font-size: 0.82rem; color: var(--text2); padding: 7px 12px; border-radius: var(--radius); text-decoration: none; transition: all 0.15s; display: block; }
+.drawer-sub:hover { background: var(--accent-l); color: var(--accent); }
+
+/* ── LAYOUT ── */
+.layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  min-height: calc(100vh - 56px);
+  margin-top: 56px;
+  max-width: 1200px;
+  margin-left: auto; margin-right: auto;
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  position: sticky; top: 56px;
+  height: calc(100vh - 56px);
+  overflow-y: auto; overflow-x: hidden;
+  border-right: 1px solid var(--border);
+  padding: 20px 0;
+  background: var(--white);
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-track { background: transparent; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+.sidebar-section { margin-bottom: 4px; }
+.sidebar-topic {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 16px; cursor: pointer;
+  font-size: 0.78rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--muted); transition: color 0.15s; user-select: none;
+}
+.sidebar-topic:hover { color: var(--text); }
+.sidebar-topic .topic-dot { width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; flex-shrink: 0; }
+.sidebar-topic-left { display: flex; align-items: center; }
+.sidebar-arrow { font-size: 0.65rem; transition: transform 0.2s; color: var(--border2); }
+.sidebar-section.open .sidebar-arrow { transform: rotate(90deg); }
+
+.sidebar-items { display: none; flex-direction: column; padding: 2px 0 8px; }
+.sidebar-section.open .sidebar-items { display: flex; }
+.sidebar-item {
+  display: block; padding: 6px 16px 6px 36px;
+  font-size: 0.82rem; color: var(--text2);
+  text-decoration: none; transition: all 0.15s;
+  border-left: 2px solid transparent; margin-left: 0;
+  line-height: 1.4;
+}
+.sidebar-item:hover { color: var(--accent); background: var(--accent-l); border-left-color: var(--accent); }
+.sidebar-item.active { color: var(--accent); background: var(--accent-l); border-left-color: var(--accent); font-weight: 500; }
+
+/* ── MAIN CONTENT ── */
+.main {
+  padding: 40px 48px 80px;
+  min-width: 0;
+  max-width: 800px;
+}
+
+/* ── HERO (home state) ── */
+.home-hero {
+  padding: 20px 0 48px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 40px;
+}
+.home-hero-label {
+  font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 16px;
+  display: flex; align-items: center; gap: 8px;
+}
+.home-hero-label::before { content: ''; width: 24px; height: 1px; background: var(--accent); }
+.home-hero h1 {
+  font-family: var(--serif);
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  line-height: 1.15; font-weight: 400;
+  color: var(--text); margin-bottom: 16px;
+  letter-spacing: -0.01em;
+}
+.home-hero h1 em { color: var(--accent); font-style: italic; }
+.home-hero p {
+  font-size: 1rem; color: var(--text2); max-width: 520px;
+  line-height: 1.75; margin-bottom: 28px;
+}
+.home-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.home-tag {
+  font-family: var(--mono); font-size: 0.7rem;
+  padding: 4px 10px; border-radius: 3px;
+  background: var(--bg2); color: var(--text2); border: 1px solid var(--border);
+  transition: all 0.15s; cursor: pointer; text-decoration: none;
+}
+.home-tag:hover { background: var(--accent-l); color: var(--accent); border-color: var(--accent); }
+
+/* ── TOPIC CARDS GRID ── */
+.topics-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; margin-bottom: 48px; }
+.topic-card {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px;
+  cursor: pointer; transition: all 0.2s;
+  text-decoration: none; display: block;
+  box-shadow: var(--shadow);
+}
+.topic-card:hover { border-color: var(--accent); box-shadow: var(--shadow-md); transform: translateY(-2px); }
+.topic-card-dot { width: 10px; height: 10px; border-radius: 50%; margin-bottom: 12px; }
+.topic-card h3 { font-size: 0.92rem; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.topic-card p { font-size: 0.75rem; color: var(--muted); line-height: 1.5; }
+.topic-card-count { font-family: var(--mono); font-size: 0.65rem; color: var(--muted); margin-top: 10px; }
+
+/* ── GUIDE VIEWER ── */
+#guideView { display: none; }
+#guideView.active { display: block; }
+.guide-breadcrumb {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 0.75rem; color: var(--muted);
+  margin-bottom: 24px; flex-wrap: wrap;
+}
+.guide-breadcrumb a { color: var(--accent); text-decoration: none; }
+.guide-breadcrumb a:hover { text-decoration: underline; }
+.guide-breadcrumb span { color: var(--border2); }
+
+.guide-frame-wrap {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.guide-frame {
+  width: 100%; min-height: 75vh; border: none; display: block;
+}
+.guide-loading {
+  padding: 60px; text-align: center;
+  font-family: var(--mono); font-size: 0.78rem; color: var(--muted);
+}
+.guide-loading .spinner { display: inline-block; width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 12px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── HOME VIEW ── */
+#homeView { display: block; }
+#homeView.hidden { display: none; }
+
+/* ── SECTION DIVIDER ── */
+.section-head {
+  font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--muted);
+  padding-bottom: 10px; border-bottom: 1px solid var(--border);
+  margin-bottom: 20px; margin-top: 40px;
+}
+.section-head:first-child { margin-top: 0; }
+
+/* ── AD SLOT ── */
+.ad-slot {
+  background: var(--bg2); border: 1px dashed var(--border2);
+  border-radius: var(--radius); padding: 20px; text-align: center;
+  font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--muted); margin: 28px 0;
+}
+
+/* ── ABOUT STRIP ── */
+.about-strip {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 28px;
+  display: flex; gap: 20px; align-items: flex-start;
+  box-shadow: var(--shadow); margin-bottom: 48px;
+}
+.about-avatar {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-l), var(--accent));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.6rem; flex-shrink: 0;
+}
+.about-info h2 { font-family: var(--serif); font-size: 1.2rem; margin-bottom: 4px; }
+.about-info p { font-size: 0.85rem; color: var(--text2); line-height: 1.7; }
+.about-info a { color: var(--accent); text-decoration: none; }
+.about-info a:hover { text-decoration: underline; }
+
+/* ── FOOTER ── */
+footer {
+  border-top: 1px solid var(--border); padding: 24px 48px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px;
+  background: var(--white);
+}
+.footer-copy { font-family: var(--mono); font-size: 0.68rem; color: var(--muted); }
+.footer-links { display: flex; gap: 20px; list-style: none; }
+.footer-links a { font-size: 0.75rem; color: var(--muted); text-decoration: none; transition: color 0.15s; }
+.footer-links a:hover { color: var(--accent); }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.fade-in { animation: fadeIn 0.35s ease both; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 860px) {
+  .layout { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+  .main { padding: 24px 16px 60px; }
+  .topnav-center { display: none; }
+  .hamburger { display: flex; }
+  footer { padding: 20px 16px; }
+  .about-strip { flex-direction: column; }
+  .topics-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 480px) {
+  .topics-grid { grid-template-columns: 1fr; }
+  .home-hero h1 { font-size: 1.75rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="topnav">
+  <a class="topnav-logo" href="#" onclick="showHome()">Indhu's <em>Coding Corner</em></a>
+  <div class="topnav-center" id="topnavCenter">
+    <!-- populated by JS -->
+  </div>
+  <button class="hamburger" onclick="toggleDrawer()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- MOBILE DRAWER -->
+<div class="drawer" id="drawer">
+  <!-- populated by JS -->
+</div>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <!-- populated by JS -->
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- HOME VIEW -->
+    <div id="homeView">
+      <div class="home-hero fade-in">
+        <div class="home-hero-label">Technical Reference</div>
+        <h1>Learn by doing.<br><em>Reference by reading.</em></h1>
+        <p>Practical, deep-dive guides on backend engineering — .NET, AWS, Cloud, Design Patterns and everything in between. Written by a curious engineer who actually uses this stuff.</p>
+        <div class="home-tags" id="homeTags">
+          <!-- populated by JS -->
+        </div>
+      </div>
+
+      <div class="ad-slot">
+        <!-- Google AdSense auto ad will appear here -->
+        Advertisement
+      </div>
+
+      <div class="section-head">Browse by topic</div>
+      <div class="topics-grid" id="topicsGrid">
+        <!-- populated by JS -->
+      </div>
+
+      <div class="about-strip fade-in">
+        <div class="about-avatar">👩‍💻</div>
+        <div class="about-info">
+          <h2>Indhumathi Baskar</h2>
+          <p>Backend engineer. I write the guides I wish existed when I was learning — deep, practical, with real code examples. 26+ guides and counting. Also on <a href="https://indhuscodingcorner.substack.com" target="_blank">Substack</a> for updates.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- GUIDE VIEW -->
+    <div id="guideView">
+      <div class="guide-breadcrumb" id="breadcrumb"></div>
+      <div class="ad-slot">Advertisement</div>
+      <div class="guide-frame-wrap">
+        <div class="guide-loading" id="guideLoading">
+          <div class="spinner"></div><br>Loading guide...
+        </div>
+        <iframe class="guide-frame" id="guideFrame" style="display:none;"
+          onload="frameLoaded()" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+      </div>
+      <div class="ad-slot">Advertisement</div>
+    </div>
+
+  </main>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-copy">© 2025 Indhumathi Baskar · Indhu's Coding Corner</div>
+  <ul class="footer-links">
+    <li><a href="https://indhuscodingcorner.substack.com" target="_blank">Substack</a></li>
+    <li><a href="about.html">About</a></li>
+  </ul>
+</footer>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAGZSBAHalS8f9B0KFZN80deFt5XvuUe_w",
+  authDomain: "indhuscodingcorner.firebaseapp.com",
+  projectId: "indhuscodingcorner",
+  storageBucket: "indhuscodingcorner.firebasestorage.app",
+  messagingSenderId: "31939027796",
+  appId: "1:31939027796:web:8e19810c0035a4b2e91ec1",
+  measurementId: "G-82PXZSC47R"
+};
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+
+// ═══════════════════════════════════════════════════════════════
+// ██  MENU CONFIG — EDIT THIS TO ADD/REMOVE TOPICS & GUIDES  ██
+// ═══════════════════════════════════════════════════════════════
+// Each topic has: name, color (dot), icon, description, and guides[]
+// Each guide has: title, file (path to your HTML file on GitHub Pages)
+// To add a new guide: add a new { title, file } entry under the right topic
+// To add a new topic: copy a topic block and change the values
+// ═══════════════════════════════════════════════════════════════
+const TOPICS = [
+  {
+    id: "dotnet",
+    name: ".NET & C#",
+    color: "#6c47d4",
+    icon: "⚙️",
+    description: "C#, ASP.NET Core, gRPC, patterns and more",
+    guides: [
+      { title: "gRPC — Complete Guide",            file: "guides/grpc-complete-guide.html" },
+      { title: "GoF Behavioral Patterns in C#",    file: "guides/gof-behavioral-patterns.html" },
+      { title: "MQTT with MQTTnet in C#",          file: "guides/mqtt-guide.html" },
+      // ← ADD NEW .NET GUIDES HERE
+    ]
+  },
+  {
+    id: "aws",
+    name: "AWS",
+    color: "#d4872a",
+    icon: "☁️",
+    description: "S3, SQS, ECS, EKS and cloud architecture",
+    guides: [
+      { title: "AWS S3 — Complete Reference",      file: "guides/aws-s3-guide.html" },
+      { title: "AWS SQS — 120 Questions",          file: "guides/aws-sqs-guide.html" },
+      { title: "ECS vs EKS — Container Guide",     file: "guides/aws-containers-guide.html" },
+      // ← ADD NEW AWS GUIDES HERE
+    ]
+  },
+  {
+    id: "algorithms",
+    name: "Algorithms",
+    color: "#2a9a6a",
+    icon: "🧮",
+    description: "Patterns, problem-solving and interview prep",
+    guides: [
+      { title: "Two Pointer Pattern",              file: "guides/two-pointer.html" },
+      { title: "Sliding Window Pattern",           file: "guides/sliding-window.html" },
+      { title: "Kadane's Algorithm",               file: "guides/kadanes-algorithm.html" },
+      // ← ADD NEW ALGORITHM GUIDES HERE
+    ]
+  },
+  {
+    id: "database",
+    name: "Database",
+    color: "#2a6aaa",
+    icon: "🗄️",
+    description: "SQL Server, queries and database design",
+    guides: [
+      { title: "SQL Server — Complete Tutorial",   file: "guides/sql-server-guide.html" },
+      // ← ADD NEW DATABASE GUIDES HERE
+    ]
+  },
+  {
+    id: "tech",
+    name: "Tech & News",
+    color: "#aa2a6a",
+    icon: "📡",
+    description: "Anything interesting in tech right now",
+    guides: [
+      // ← ADD TECH ARTICLES HERE
+      // Example: { title: "What is WebAssembly?", file: "guides/webassembly.html" },
+    ]
+  }
+];
+// ═══════════════════════════════════════════════════════════════
+// END CONFIG — everything below is automatic
+// ═══════════════════════════════════════════════════════════════
+
+let activeTopic = null;
+let activeGuide = null;
+
+// Build top nav topic buttons
+const topnavCenter = document.getElementById('topnavCenter');
+TOPICS.forEach(topic => {
+  const btn = document.createElement('button');
+  btn.className = 'topnav-topic-btn';
+  btn.dataset.id = topic.id;
+  btn.innerHTML = `<span class="dot" style="background:${topic.color}"></span>${topic.name}`;
+  btn.onclick = () => openTopic(topic.id);
+  topnavCenter.appendChild(btn);
+});
+
+// Build sidebar
+const sidebar = document.getElementById('sidebar');
+TOPICS.forEach(topic => {
+  const section = document.createElement('div');
+  section.className = 'sidebar-section';
+  section.dataset.id = topic.id;
+  section.innerHTML = `
+    <div class="sidebar-topic" onclick="toggleSidebarSection('${topic.id}')">
+      <div class="sidebar-topic-left">
+        <span class="topic-dot" style="background:${topic.color}"></span>
+        ${topic.name}
+      </div>
+      <span class="sidebar-arrow">›</span>
+    </div>
+    <div class="sidebar-items">
+      ${topic.guides.length === 0
+        ? `<span class="sidebar-item" style="opacity:0.5;cursor:default;">Coming soon...</span>`
+        : topic.guides.map((g, i) =>
+          `<a class="sidebar-item" href="#" data-topic="${topic.id}" data-index="${i}" onclick="loadGuide('${topic.id}',${i},event)">${g.title}</a>`
+        ).join('')}
+    </div>
+  `;
+  sidebar.appendChild(section);
+});
+
+// Build mobile drawer
+const drawer = document.getElementById('drawer');
+TOPICS.forEach(topic => {
+  const wrap = document.createElement('div');
+  wrap.innerHTML = `
+    <div class="drawer-topic" onclick="toggleDrawerTopic(this)">
+      ${topic.icon} ${topic.name}
+      <span class="arrow">›</span>
+    </div>
+    <div class="drawer-subs">
+      ${topic.guides.length === 0
+        ? `<span class="drawer-sub" style="opacity:0.5;">Coming soon...</span>`
+        : topic.guides.map((g, i) =>
+          `<a class="drawer-sub" href="#" onclick="loadGuide('${topic.id}',${i},event);toggleDrawer()">${g.title}</a>`
+        ).join('')}
+    </div>
+  `;
+  drawer.appendChild(wrap);
+});
+
+// Build home tags
+const homeTags = document.getElementById('homeTags');
+TOPICS.forEach(topic => {
+  const tag = document.createElement('a');
+  tag.className = 'home-tag';
+  tag.href = '#';
+  tag.textContent = `${topic.icon} ${topic.name}`;
+  tag.onclick = (e) => { e.preventDefault(); openTopic(topic.id); };
+  homeTags.appendChild(tag);
+});
+
+// Build topic cards
+const topicsGrid = document.getElementById('topicsGrid');
+TOPICS.forEach(topic => {
+  const card = document.createElement('div');
+  card.className = 'topic-card';
+  card.onclick = () => openTopic(topic.id);
+  card.innerHTML = `
+    <div class="topic-card-dot" style="background:${topic.color}"></div>
+    <h3>${topic.icon} ${topic.name}</h3>
+    <p>${topic.description}</p>
+    <div class="topic-card-count">${topic.guides.length} guide${topic.guides.length !== 1 ? 's' : ''}</div>
+  `;
+  topicsGrid.appendChild(card);
+});
+
+// Open a topic (expand sidebar section + show first guide or topic overview)
+window.openTopic = function(topicId) {
+  // Update nav active state
+  document.querySelectorAll('.topnav-topic-btn').forEach(b => b.classList.toggle('active', b.dataset.id === topicId));
+  // Open sidebar section
+  document.querySelectorAll('.sidebar-section').forEach(s => {
+    if (s.dataset.id === topicId) s.classList.add('open');
+  });
+  activeTopic = topicId;
+  const topic = TOPICS.find(t => t.id === topicId);
+  if (topic && topic.guides.length > 0) {
+    loadGuide(topicId, 0);
+  }
+};
+
+// Toggle sidebar section open/close
+window.toggleSidebarSection = function(topicId) {
+  const section = document.querySelector(`.sidebar-section[data-id="${topicId}"]`);
+  section.classList.toggle('open');
+};
+
+// Load a guide into the iframe
+window.loadGuide = function(topicId, index, event) {
+  if (event) event.preventDefault();
+  const topic = TOPICS.find(t => t.id === topicId);
+  if (!topic || !topic.guides[index]) return;
+  const guide = topic.guides[index];
+
+  activeTopic = topicId;
+  activeGuide = index;
+
+  // Update active states
+  document.querySelectorAll('.sidebar-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.topic === topicId && parseInt(el.dataset.index) === index);
+  });
+  document.querySelectorAll('.topnav-topic-btn').forEach(b => b.classList.toggle('active', b.dataset.id === topicId));
+
+  // Show guide view
+  document.getElementById('homeView').classList.add('hidden');
+  document.getElementById('guideView').classList.remove('hidden');
+  document.getElementById('guideView').classList.add('active');
+
+  // Breadcrumb
+  document.getElementById('breadcrumb').innerHTML = `
+    <a href="#" onclick="showHome();return false;">Home</a>
+    <span>›</span>
+    <a href="#" onclick="openTopic('${topicId}');return false;">${topic.name}</a>
+    <span>›</span>
+    <span>${guide.title}</span>
+  `;
+
+  // Load iframe
+  const frame = document.getElementById('guideFrame');
+  const loading = document.getElementById('guideLoading');
+  frame.style.display = 'none';
+  loading.style.display = 'block';
+  frame.src = guide.file;
+
+  // Scroll to top
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // Analytics
+  logEvent(analytics, 'guide_view', { topic: topicId, guide: guide.title });
+};
+
+// Frame loaded
+window.frameLoaded = function() {
+  const frame = document.getElementById('guideFrame');
+  const loading = document.getElementById('guideLoading');
+  loading.style.display = 'none';
+  frame.style.display = 'block';
+  // Auto-size iframe to content
+  try {
+    const height = frame.contentDocument.body.scrollHeight;
+    if (height > 200) frame.style.height = height + 'px';
+  } catch(e) {
+    frame.style.height = '80vh';
+  }
+};
+
+// Show home
+window.showHome = function() {
+  document.getElementById('homeView').classList.remove('hidden');
+  document.getElementById('guideView').classList.remove('active');
+  document.getElementById('guideView').style.display = 'none';
+  document.getElementById('guideView').classList.remove('active');
+  document.getElementById('homeView').style.display = '';
+  document.querySelectorAll('.topnav-topic-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+};
+
+// Mobile drawer toggle
+window.toggleDrawer = function() {
+  document.getElementById('drawer').classList.toggle('open');
+};
+
+// Mobile drawer topic expand
+window.toggleDrawerTopic = function(el) {
+  el.classList.toggle('open');
+  const subs = el.nextElementSibling;
+  subs.classList.toggle('open');
+};
+
+// Fix homeView show after hide
+document.getElementById('guideView').style.display = '';
+</script>
+
+<!-- Firebase Analytics -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
+</script>
+
+</body>
+</html>

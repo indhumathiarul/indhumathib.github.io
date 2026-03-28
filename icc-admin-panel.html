@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Indhu's Coding Corner</title>
+<!-- NOTE: This page is at a URL only you know. Do NOT link to it publicly. -->
+<!-- To set up: Go to Firebase Console → Authentication → Sign-in method → Enable Email/Password -->
+<!-- Then add your email as a user. That's your login. No password in code anywhere. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#faf9f7;--white:#fff;--border:#e4dfd8;--border2:#d4cfc8;
+  --text:#1a1814;--text2:#4a453f;--muted:#8c877f;
+  --accent:#c96a2a;--accent-l:#f5e6d8;
+  --red:#dc3545;--green:#2a7a5a;--green-l:#d8f0e8;
+  --sans:'DM Sans',sans-serif;--mono:'JetBrains Mono',monospace;
+  --radius:6px;--shadow:0 1px 3px rgba(0,0,0,0.06),0 4px 12px rgba(0,0,0,0.04);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{font-size:15px;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.6;min-height:100vh;}
+
+/* LOGIN SCREEN */
+#loginScreen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);z-index:999;}
+.login-card{background:var(--white);border:1px solid var(--border);border-radius:8px;padding:36px 28px;width:min(380px,92vw);box-shadow:var(--shadow);}
+.login-card h1{font-size:1.2rem;font-weight:600;margin-bottom:4px;}
+.login-card .sub{font-family:var(--mono);font-size:0.7rem;color:var(--muted);margin-bottom:28px;}
+.field{margin-bottom:16px;}
+.field label{font-family:var(--mono);font-size:0.67rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;}
+.field input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;font-family:var(--sans);font-size:0.88rem;color:var(--text);outline:none;transition:border-color 0.15s;}
+.field input:focus{border-color:var(--accent);}
+.err{font-family:var(--mono);font-size:0.7rem;color:var(--red);margin-bottom:12px;display:none;padding:8px 10px;background:#fff5f5;border-radius:4px;border:1px solid #fecdd3;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 18px;font-family:var(--sans);font-size:0.85rem;font-weight:500;border-radius:var(--radius);border:none;cursor:pointer;transition:all 0.2s;text-decoration:none;}
+.btn-accent{background:var(--accent);color:#fff;width:100%;}
+.btn-accent:hover{background:#b85d22;}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border);}
+.btn-ghost:hover{border-color:var(--border2);color:var(--text);}
+.btn-danger{background:transparent;color:var(--red);border:1px solid #fecdd3;}
+.btn-danger:hover{background:#fff5f5;}
+.btn-green{background:var(--green);color:#fff;}
+.btn-green:hover{background:#226650;}
+.btn:disabled{opacity:0.6;cursor:not-allowed;}
+
+/* ADMIN UI */
+#adminScreen{display:none;}
+.admin-nav{position:sticky;top:0;z-index:50;background:rgba(250,249,247,0.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);height:52px;display:flex;align-items:center;padding:0 20px;gap:12px;}
+.admin-nav-logo{font-size:0.85rem;font-weight:600;color:var(--text);}
+.admin-nav-logo span{color:var(--accent);}
+.admin-nav-right{display:flex;align-items:center;gap:10px;margin-left:auto;}
+.user-badge{font-family:var(--mono);font-size:0.68rem;color:var(--muted);background:var(--bg);border:1px solid var(--border);padding:4px 10px;border-radius:3px;}
+
+.admin-body{max-width:680px;margin:0 auto;padding:28px 20px 80px;}
+.admin-section{margin-bottom:36px;}
+.admin-section-title{font-size:0.75rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);padding-bottom:10px;border-bottom:1px solid var(--border);margin-bottom:20px;}
+
+/* MENU EDITOR */
+.menu-editor{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);}
+.menu-editor-header{padding:16px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.menu-editor-header h3{font-size:0.88rem;font-weight:600;}
+.menu-code{padding:0;}
+.menu-code textarea{width:100%;min-height:320px;border:none;background:#1a1814;color:#e8e4dc;font-family:var(--mono);font-size:0.75rem;line-height:1.7;padding:16px;outline:none;resize:vertical;}
+
+/* GUIDE UPLOAD */
+.upload-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);}
+.drop-zone{border:2px dashed var(--border2);border-radius:var(--radius);padding:32px;text-align:center;cursor:pointer;transition:all 0.2s;margin-bottom:16px;}
+.drop-zone:hover,.drop-zone.over{border-color:var(--accent);background:var(--accent-l);}
+.drop-zone p{font-family:var(--mono);font-size:0.75rem;color:var(--muted);}
+.drop-zone p strong{color:var(--accent);}
+.file-name{font-family:var(--mono);font-size:0.72rem;color:var(--green);margin-top:8px;display:none;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.form-row .field{margin-bottom:0;}
+select.field-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;font-family:var(--sans);font-size:0.88rem;color:var(--text);outline:none;transition:border-color 0.15s;-webkit-appearance:none;}
+select.field-input:focus{border-color:var(--accent);}
+
+/* STATUS MSG */
+.status{font-family:var(--mono);font-size:0.72rem;padding:10px 14px;border-radius:var(--radius);margin-top:12px;display:none;}
+.status.ok{background:var(--green-l);color:var(--green);border:1px solid #b8e0d0;}
+.status.err{background:#fff5f5;color:var(--red);border:1px solid #fecdd3;}
+
+/* INSTRUCTIONS */
+.instructions{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);}
+.instructions h3{font-size:0.88rem;font-weight:600;margin-bottom:12px;}
+.instructions ol{padding-left:18px;font-size:0.82rem;color:var(--text2);line-height:2;}
+.instructions code{font-family:var(--mono);font-size:0.72rem;background:var(--bg2);padding:1px 6px;border-radius:3px;color:var(--accent);}
+
+@media(max-width:560px){
+  .form-row{grid-template-columns:1fr;}
+  .admin-body{padding:20px 14px 60px;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div style="font-size:1.5rem;margin-bottom:12px;">🔒</div>
+    <h1>Admin Login</h1>
+    <p class="sub">indhu's coding corner · secure access</p>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="loginEmail" placeholder="your@email.com" autocomplete="email">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="loginPw" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="err" id="loginErr"></div>
+    <button class="btn btn-accent" id="loginBtn" onclick="doLogin()">Sign in →</button>
+    <p style="font-family:var(--mono);font-size:0.65rem;color:var(--muted);text-align:center;margin-top:16px;">Login managed by Firebase Auth · no password stored in code</p>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div id="adminScreen">
+  <nav class="admin-nav">
+    <div class="admin-nav-logo"><span>⚡</span> Admin Panel</div>
+    <div class="admin-nav-right">
+      <span class="user-badge" id="userBadge"></span>
+      <a href="index.html" class="btn btn-ghost" style="font-size:0.75rem;padding:6px 12px;">← View site</a>
+      <button class="btn btn-ghost" style="font-size:0.75rem;padding:6px 12px;" onclick="doLogout()">Logout</button>
+    </div>
+  </nav>
+
+  <div class="admin-body">
+
+    <!-- HOW TO ADD GUIDES -->
+    <div class="admin-section">
+      <div class="admin-section-title">How to add new guides</div>
+      <div class="instructions">
+        <h3>Step-by-step from your phone 📱</h3>
+        <ol>
+          <li>Save your new <code>.html</code> guide file</li>
+          <li>Go to your GitHub repo → <code>guides/</code> folder</li>
+          <li>Tap <strong>Add file → Upload files</strong></li>
+          <li>Upload your <code>.html</code> file — note the exact filename</li>
+          <li>Open <code>index.html</code> in GitHub → tap the ✏️ edit icon</li>
+          <li>Find the <code>TOPICS</code> config section (it says <strong>EDIT THIS</strong>)</li>
+          <li>Add a new line: <code>{'{'} title: "Your Guide Title", file: "guides/your-file.html" {'}'}</code></li>
+          <li>Tap <strong>Commit changes</strong> → live in 2 minutes ✅</li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- QUICK REFERENCE -->
+    <div class="admin-section">
+      <div class="admin-section-title">Topic config quick reference</div>
+      <div class="menu-editor">
+        <div class="menu-editor-header">
+          <h3>Copy this format when adding guides to index.html</h3>
+        </div>
+        <div class="menu-code">
+          <textarea readonly>// To add a new guide to an existing topic:
+// Find the topic block in index.html and add a line inside guides: []
+
+{ title: "Your Guide Title", file: "guides/your-guide-filename.html" },
+
+// ─────────────────────────────────────────────
+// To add a brand new topic:
+// Copy and paste this block inside the TOPICS array:
+
+{
+  id: "your-topic-id",          // unique id, no spaces
+  name: "Topic Name",           // shown in nav & sidebar
+  color: "#2a7a5a",             // dot color (any hex color)
+  icon: "📦",                   // emoji icon
+  description: "Short description shown on home page",
+  guides: [
+    { title: "First Guide Title", file: "guides/first-guide.html" },
+    { title: "Second Guide",      file: "guides/second-guide.html" },
+    // add more guides here
+  ]
+},
+
+// ─────────────────────────────────────────────
+// File naming tips:
+// - Keep filenames lowercase with hyphens: my-csharp-guide.html
+// - Upload to the /guides/ folder in your GitHub repo
+// - The file path in config = "guides/your-file.html"</textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECURITY NOTES -->
+    <div class="admin-section">
+      <div class="admin-section-title">Security info</div>
+      <div class="instructions">
+        <h3>How your login works (no hardcoded password 🔒)</h3>
+        <ol>
+          <li>Go to <strong>Firebase Console</strong> → <code>Authentication</code> → <code>Sign-in method</code></li>
+          <li>Enable <strong>Email/Password</strong> provider</li>
+          <li>Go to <code>Users</code> tab → <strong>Add user</strong></li>
+          <li>Enter your email + a strong password</li>
+          <li>That's it — your password lives only in Firebase, never in code</li>
+          <li>To change password: Firebase Console → Authentication → Users → Reset</li>
+        </ol>
+        <p style="font-size:0.78rem;color:var(--muted);margin-top:12px;font-family:var(--mono);">This admin page URL is not linked anywhere on the site. Keep the URL private.</p>
+      </div>
+    </div>
+
+    <!-- ANALYTICS LINK -->
+    <div class="admin-section">
+      <div class="admin-section-title">Analytics</div>
+      <div class="instructions">
+        <h3>View your site analytics</h3>
+        <ol>
+          <li>Go to <a href="https://console.firebase.google.com" target="_blank" style="color:var(--accent);">Firebase Console</a> → your project</li>
+          <li>Click <strong>Analytics</strong> in the left menu</li>
+          <li>See page views, guide views, and user activity</li>
+        </ol>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAGZSBAHalS8f9B0KFZN80deFt5XvuUe_w",
+  authDomain: "indhuscodingcorner.firebaseapp.com",
+  projectId: "indhuscodingcorner",
+  storageBucket: "indhuscodingcorner.firebasestorage.app",
+  messagingSenderId: "31939027796",
+  appId: "1:31939027796:web:8e19810c0035a4b2e91ec1",
+  measurementId: "G-82PXZSC47R"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+// Auth state listener
+onAuthStateChanged(auth, user => {
+  if (user) {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('adminScreen').style.display = 'block';
+    document.getElementById('userBadge').textContent = user.email;
+  } else {
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('adminScreen').style.display = 'none';
+  }
+});
+
+window.doLogin = async function() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pw = document.getElementById('loginPw').value;
+  const errEl = document.getElementById('loginErr');
+  const btn = document.getElementById('loginBtn');
+  errEl.style.display = 'none';
+  btn.disabled = true; btn.textContent = 'Signing in...';
+  try {
+    await signInWithEmailAndPassword(auth, email, pw);
+  } catch(e) {
+    errEl.textContent = 'Login failed. Check your email and password.';
+    errEl.style.display = 'block';
+    btn.disabled = false; btn.textContent = 'Sign in →';
+  }
+};
+
+window.doLogout = async function() {
+  await signOut(auth);
+};
+</script>
+</body>
+</html>
